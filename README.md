@@ -1,1 +1,2 @@
-# comp5010-groups
+# Autonomous Remote Intelligent Robot
+comp5010-groups
