@@ -87,3 +87,6 @@ def PerformSpin(degrees):
 
     # Turn the motors off
     TB.MotorsOff()
+
+if __name__ == "__main__":
+    PerformSpin(90)
