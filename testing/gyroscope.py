@@ -2,7 +2,7 @@
 Rotate given angle, tracked using gyroscope.
 """
 
-import ThunderBorg
+import ThunderBorg3 as ThunderBorg # conversion for python 3
 import time
 import math
 import sys
@@ -31,15 +31,14 @@ if not TB.foundChip:
     sys.exit()
 TB.SetCommsFailsafe(False)  # Disable the communications failsafe
 
-# Movement settings (worked out from our MonsterBorg on carpet tiles)
-timeForward1m = 0.85  # Number of seconds needed to move about 1 meter
-timeSpin360 = 1.10  # Number of seconds needed to make a full left / right spin
-testMode = False  # True to run the motion tests, False to run the normal sequence
-
 # Power settings
-voltageIn = 12.0  # Total battery voltage to the ThunderBorg
+voltageIn = 9.6   # Total battery voltage to the ThunderBorg
+
+# NOTE: limiter has lower bound to power motors, ~0.4 experimental lower bound
+limiter = 0.6     # utilise only <limiter>% of power, to slow down actions
+
 voltageOut = (
-    12.0 * 0.95
+    12.0 * limiter
 )  # Maximum motor voltage, we limit it to 95% to allow the RPi to get uninterrupted power
 
 # Setup the power limits
@@ -54,11 +53,11 @@ mpu = adafruit_mpu6050.MPU6050(i2c)
 
 # Function to spin an angle in degrees
 def PerformSpin(degrees):
-    if angle < 0.0:
+    if degrees < 0.0:
         # Left turn
         driveLeft = -1.0
         driveRight = +1.0
-        angle *= -1
+        degrees *= -1
     else:
         # Right turn
         driveLeft = +1.0
@@ -69,24 +68,45 @@ def PerformSpin(degrees):
     TB.SetMotor2(driveLeft * maxPower)
     
     # poll the gyroscope for rotation
-    sampling = 0.05 # poll every 0.05 seconds, fine tune to minimise overshooting target rotation
+    # NOTE: sampling limited by real-time clock on system (0.1ms theoretical minimum, but experimentally encountered errors)
+    sampling = 0.08 # poll every <sampling> seconds, fine tune to minimise overshooting target rotation
     total_rotation = 0
 
     while True:
         x, y, z = mpu.gyro
-        print("Gyro X:%.2f, Y: %.2f, Z: %.2f rad/s" % (x, y, z))
         x, y, z = math.degrees(x), math.degrees(y), math.degrees(z)
-        print("Gyro X:%.2f, Y: %.2f, Z: %.2f deg/s" % (x, y, z))
+        abs_z = abs(z)
+        sample = abs_z * sampling
 
-        total_rotation += (x * sampling) # increment degree rotation by current rotation velocity, devided by sampling time
+        #print("Gyro X:%.2f, Y: %.2f, Z: %.2f rad/s" % (x, y, z))        
+        print("X:%.2f, Y: %.2f, Z: %.2f deg/s \t sample:%.2f \t total:%.2f" % (x, y, z, sample, total_rotation))
+        #print(total_rotation)
 
+        # NOTE: z-axis experimentally defined as 2d plane orientation
+        total_rotation += sample # increment degree rotation by current rotation velocity, devided by sampling time
+
+        # if exceeded target exit
         if total_rotation >= degrees:
             break   # exit once achieved target rotation
+        # if predicted to exceed during sleep, sleep for predicted time to target, then exit
+        elif (total_rotation + sample) >= degrees:
+            # total degrees left in rotation (degress-total_rotation) divided by abs(z) (positive rotational velocity) gives time to sleep (in seconds) before reaching target
+            sleep = (degrees-total_rotation)/abs_z
+
+            print("Assuming constant rotation of Z:%.2f, sleeping for %.2f seconds to rotate %.2f degrees" % (abs_z, sleep, (degrees-total_rotation)))
+            time.sleep(sleep)
+
+            # NOTE: this will set total rotation to target, which is only correct assuming rotation halts immediately and rotational velocity remains constant
+            # in non-demo system current orientation should be independently tracked, not adjusted using this approximation
+            total_rotation += abs_z * sleep  # update final rotation for tracking
+            break
 
         time.sleep(sampling)
 
     # Turn the motors off
     TB.MotorsOff()
+
+    print(f"total rotation: {total_rotation}")
 
 if __name__ == "__main__":
     PerformSpin(90)
