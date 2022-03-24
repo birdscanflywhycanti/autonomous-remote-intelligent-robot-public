@@ -29,7 +29,7 @@ if not TB.foundChip:
         for board in boards:
             print("    %02X (%d)" % (board, board))
         print(
-            "If you need to change the I²C address change the setup line so it is correct, e.g."
+            "If you need to change the I2C address change the setup line so it is correct, e.g."
         )
         print("TB.i2cAddress = 0x%02X" % (boards[0]))
     sys.exit()
@@ -118,21 +118,22 @@ def a_star(matrix):
 
 def pathing(path, origin=False, curr_angle=0):
     if not origin: 
-        origin = path.pop()
+        origin = path.pop(0)
     
     instructions = []
 
-    unit_size = 0.40 #m
-    diagonal_unit_distance = math.sqrt(0.4**2 + 0.4**2) # Pythagorean theorem
+    unit_size = 0.4 #m
+    diagonal_unit_distance = math.sqrt(unit_size**2 + unit_size**2) # Pythagorean theorem
 
     x, y = origin
     for coord in path:
+        print(coord)
         x_, y_ = coord
 
         if x_ == x-1 and y_ == y-1:
             # move to relative top left
             # orient to face north (spin degree of current angle from North)
-            instructions.append((PerformSpin, curr_angle))
+            instructions.append((PerformSpin, -curr_angle))
             # spin further -45 degrees to face destination
             curr_angle = 315
             instructions.append((PerformSpin, curr_angle))
@@ -142,13 +143,13 @@ def pathing(path, origin=False, curr_angle=0):
         elif x_ == x and y_ == y-1:
             # move to relative top
             # orient to face north (spin degree of current angle from North)
-            instructions.append((PerformSpin, curr_angle))
+            instructions.append((PerformSpin, -curr_angle))
             instructions.append((PerformDrive, unit_size))
 
         elif x_ == x+1 and y_ == y-1:
             # move to relative top right
             # orient to face north (spin degree of current angle from North)
-            instructions.append((PerformSpin, curr_angle))
+            instructions.append((PerformSpin, -curr_angle))
             # spin further 45 degrees to face destination
             curr_angle = 45
             instructions.append((PerformSpin, curr_angle))
@@ -158,7 +159,7 @@ def pathing(path, origin=False, curr_angle=0):
         elif x_ == x-1 and y_ == y:
             # move to relative left
             # orient to face north (spin degree of current angle from North)
-            instructions.append((PerformSpin, curr_angle))
+            instructions.append((PerformSpin, -curr_angle))
             # spin further 270 degrees to face destination
             curr_angle = 270
             instructions.append((PerformSpin, curr_angle))
@@ -171,7 +172,7 @@ def pathing(path, origin=False, curr_angle=0):
         elif x_ == x+1 and y_ == y:
             # move to relative right
             # orient to face north (spin degree of current angle from North)
-            instructions.append((PerformSpin, curr_angle))
+            instructions.append((PerformSpin, -curr_angle))
             # spin further 90 degrees to face destination
             curr_angle = 90
             instructions.append((PerformSpin, curr_angle))
@@ -181,7 +182,7 @@ def pathing(path, origin=False, curr_angle=0):
         elif x_ == x-1 and y_ == y+1:
             # move to relative bottom left
             # orient to face north (spin degree of current angle from North)
-            instructions.append((PerformSpin, curr_angle))
+            instructions.append((PerformSpin, -curr_angle))
             # spin further 225 degrees to face destination
             curr_angle = 225
             instructions.append((PerformSpin, curr_angle))
@@ -191,7 +192,7 @@ def pathing(path, origin=False, curr_angle=0):
         elif x_ == x and y_ == y+1:
             # move to relative bottom
             # orient to face north (spin degree of current angle from North)
-            instructions.append((PerformSpin, curr_angle))
+            instructions.append((PerformSpin, -curr_angle))
             # spin further 180 degrees to face destination
             curr_angle = 180
             instructions.append((PerformSpin, curr_angle))
@@ -201,18 +202,20 @@ def pathing(path, origin=False, curr_angle=0):
         elif x_ == x+1 and y_ == y+1:
             # move to relative bottom right
             # orient to face north (spin degree of current angle from North)
-            instructions.append((PerformSpin, curr_angle))
+            instructions.append((PerformSpin, -curr_angle))
             # spin further 135 degrees to face destination
             curr_angle = 135
             instructions.append((PerformSpin, curr_angle))
             # move forward from middle of current unit to middle of target unit
             instructions.append((PerformDrive, diagonal_unit_distance))
 
+        x, y = x_, y_
+
     return instructions
 
 def follow(instructions):
-    for action, args in instructions:
-        action(*args)
+    for action, arg in instructions:
+        action(arg)
 
 if __name__ == "__main__":
     matrix = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]
