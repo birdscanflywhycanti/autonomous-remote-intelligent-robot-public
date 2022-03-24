@@ -25,7 +25,7 @@ if not TB.foundChip:
         for board in boards:
             print("    %02X (%d)" % (board, board))
         print(
-            "If you need to change the I²C address change the setup line so it is correct, e.g."
+            "If you need to change the I2C address change the setup line so it is correct, e.g."
         )
         print("TB.i2cAddress = 0x%02X" % (boards[0]))
     sys.exit()
