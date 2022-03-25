@@ -51,62 +51,66 @@ else:
 i2c = board.I2C()  # uses board.SCL and board.SDA
 mpu = adafruit_mpu6050.MPU6050(i2c)
 
-# Function to spin an angle in degrees
-def PerformSpin(degrees):
-    if degrees < 0.0:
-        # Left turn
+# Function to drive a distance in meters
+def PerformDrive(meters):
+    if meters < 0.0:
+        # Reverse drive
         driveLeft = -1.0
-        driveRight = +1.0
-        degrees *= -1
-    else:
-        # Right turn
-        driveLeft = +1.0
         driveRight = -1.0
-
+        meters *= -1
+    else:
+        # Forward drive
+        driveLeft = +1.0
+        driveRight = +1.0
+    
+    # Perform the motion
     # Set the motors running
     TB.SetMotor1(driveRight * maxPower)
     TB.SetMotor2(driveLeft * maxPower)
     
-    # poll the gyroscope for rotation
+    # poll the gyroscope for acceleration
     # NOTE: sampling limited by real-time clock on system (0.1ms theoretical minimum, but experimentally encountered errors)
     sampling = 0.08 # poll every <sampling> seconds, fine tune to minimise overshooting target rotation
-    total_rotation = 0
+    total_motion = 0
 
     while True:
-        x, y, z = mpu.gyro
-        x, y, z = math.degrees(x), math.degrees(y), math.degrees(z)
+        x, y, z = mpu.acceleration
+        #x, y, z = math.degrees(x), math.degrees(y), math.degrees(z)
         abs_z = abs(z)
-        sample = abs_z * sampling
 
-        #print("Gyro X:%.2f, Y: %.2f, Z: %.2f rad/s" % (x, y, z))        
-        print("Gyro: X:%.2f, Y: %.2f, Z: %.2f deg/s \t sample:%.2f \t total:%.2f" % (x, y, z, sample, total_rotation))
+        # Calculate current velocity of vehicle from acceleration by time since last sample
+        velocity = abs_z * sampling     # velocity = acceleration * time
+        sample = velocity * sampling
+
+        print("Acceleration X:%.2f, Y: %.2f, Z: %.2f m/s^2" % (x, y, z))        
+        print("Velocity: X:%.2f, Y: %.2f, Z: %.2f m/s \t sample:%.2f \t total:%.2f" % (x, y, z, sample, total_motion))
         #print(total_rotation)
 
-        # NOTE: z-axis experimentally defined as 2d plane orientation
-        total_rotation += sample # increment degree rotation by current rotation velocity, divided by sampling time
+        # NOTE: z-axis experimentally defined as 2d plane forward axis
+        total_motion += sample # increment total motion by distance moved, divided by sampling time
 
         # if exceeded target exit
-        if total_rotation >= degrees:
+        if total_motion >= meters:
             break   # exit once achieved target rotation
         # if predicted to exceed during sleep, sleep for predicted time to target, then exit
-        elif (total_rotation + sample) >= degrees:
-            # total degrees left in rotation (degress-total_rotation) divided by abs(z) (positive rotational velocity) gives time to sleep (in seconds) before reaching target
-            sleep = (degrees-total_rotation)/abs_z
+        elif (total_motion + sample) >= meters:
+            # total degrees left in metres (meters-total_motion) divided by abs(z) (positive acceleration) gives time to sleep (in seconds) before reaching target
+            sleep = (meters-total_motion)/velocity
 
-            print("Assuming constant rotation of Z:%.2f, sleeping for %.2f seconds to rotate %.2f degrees" % (abs_z, sleep, (degrees-total_rotation)))
+            print("Assuming constant velocity of Z:%.2f, sleeping for %.2f seconds to drive %.2f meters" % (velocity, sleep, (meters-total_motion)))
             time.sleep(sleep)
 
-            # NOTE: this will set total rotation to target, which is only correct assuming rotation halts immediately and rotational velocity remains constant
+            # NOTE: this will set total motion to target, which is only correct assuming rotation halts immediately and velocity remains constant
             # in non-demo system current orientation should be independently tracked, not adjusted using this approximation
-            total_rotation += abs_z * sleep  # update final rotation for tracking
+            total_motion += velocity * sleep  # update final rotation for tracking
             break
 
         time.sleep(sampling)
-
+    
     # Turn the motors off
     TB.MotorsOff()
 
-    print(f"total rotation: {total_rotation}")
+    print(f"total rotation: {total_motion}")
 
 if __name__ == "__main__":
-    PerformSpin(90)
+    PerformDrive(0.5)
