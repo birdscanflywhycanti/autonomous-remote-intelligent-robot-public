@@ -1,6 +1,4 @@
-from algorithms.a_star import a_star
-from algorithms.d_star_lite import d_star_lite
-
+from algorithms.algorithm import Algorithm
 from robot.accelerometer import PerformDrive
 from robot.gyroscope import PerformSpin
 from robot.drive import pathing, follow
@@ -15,13 +13,16 @@ mpu.start()
 TB = Thunder()
 
 def main():
-    matrix = [[1, 0, 1, 1], [1, 0, 1, 0], [1, 0, 1, 1], [1, 0, 0, 1], [1, 1, 1, 1]]
-    path = a_star(matrix)
+    input_matrix = [[1, 0, 1, 1], [1, 0, 1, 0], [1, 0, 1, 1], [1, 0, 0, 1], [1, 1, 1, 1]]
+    start_node = (0,0)
+    end_node = (3,0)
+
+    algorithm = Algorithm(matrix= input_matrix, start_node= start_node, end_node= end_node)
+    path = algorithm.use_a_star()
 
     instructions = pathing(path, 0.4)
-
     print(instructions)
-
+    
     follow(instructions)
 
 if __name__ == "__main__":
