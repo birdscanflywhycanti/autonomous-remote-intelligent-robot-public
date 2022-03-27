@@ -1,5 +1,5 @@
 # thunderborg motor class
-import thunderborg.ThunderBorg3 as ThunderBorg # conversion for python 3
+import ThunderBorg3 as ThunderBorg # conversion for python 3
 import sys
 
 class Thunder:

@@ -24,6 +24,7 @@ def locate(matrix, fragment):
         rotated = np.rot90(matrix, k=(orientation / 90))
 
         for sub in fragment:
+            if 
 
 
     # split fragments into sub-fragments

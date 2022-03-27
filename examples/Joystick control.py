@@ -6,17 +6,17 @@ import time
 import os
 import sys
 import pygame
-import ThunderBorg
+import ThunderBorg3
 
 # Re-direct our output to standard error, we need to ignore standard out to hide some nasty print statements from pygame
 sys.stdout = sys.stderr
 
 # Setup the ThunderBorg
-TB = ThunderBorg.ThunderBorg()
+TB = ThunderBorg3.ThunderBorg()
 #TB.i2cAddress = 0x15                  # Uncomment and change the value if you have changed the board address
 TB.Init()
 if not TB.foundChip:
-    boards = ThunderBorg.ScanForThunderBorg()
+    boards = ThunderBorg3.ScanForThunderBorg()
     if len(boards) == 0:
         print 'No ThunderBorg found, check you are attached :)'
     else:
