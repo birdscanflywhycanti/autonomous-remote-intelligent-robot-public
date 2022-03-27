@@ -5,14 +5,14 @@ from robot.accelerometer import PerformDrive
 from robot.gyroscope import PerformSpin
 from robot.drive import pathing, follow
 from robot.mpu6050 import mpu6050
-from robot.thunderborg import Lightening
+from robot.lightening import Thunder
 
 # initialise mpu6050 board
 mpu = mpu6050()
 mpu.setName('mpu6050')
 mpu.start()
 
-TB = Lightening()
+TB = Thunder()
 
 def main():
     matrix = [[1, 0, 1, 1], [1, 0, 1, 0], [1, 0, 1, 1], [1, 0, 0, 1], [1, 1, 1, 1]]

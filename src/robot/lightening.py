@@ -2,7 +2,7 @@
 import ThunderBorg3 as ThunderBorg # conversion for python 3
 import sys
 
-class Lightening:
+class Thunder:
     def __init__(self):
         # Setup the ThunderBorg
         self.thunder = ThunderBorg.ThunderBorg()
