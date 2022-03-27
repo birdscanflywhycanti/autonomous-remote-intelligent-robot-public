@@ -171,7 +171,7 @@ def a_star(matrix, start_node, end_node):
 if __name__ == "__main__":
     #matrix = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]
     matrix = [[1, 0, 1, 1], [1, 0, 1, 0], [1, 0, 1, 1], [1, 0, 0, 1], [1, 1, 1, 1]]
-    path = a_star(matrix)
+    path = a_star(matrix, (0,0), (3,0))
 
     instructions = pathing(path, 0.4)
 
