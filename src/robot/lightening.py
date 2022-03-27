@@ -6,12 +6,13 @@ class Thunder:
     def __init__(self):
         # Setup the ThunderBorg
         self.thunder = ThunderBorg.ThunderBorg()
+        
         self.i2cAddress = self.thunder.i2cAddress
 
         # self.i2cAddress = 0x15                  # Uncomment and change the value if you have changed the board address
         self.thunder.Init()
 
-        if not TB.foundChip:
+        if not self.thunder.foundChip:
             boards = ThunderBorg.ScanForThunderBorg()
             if len(boards) == 0:
                 print("No ThunderBorg found, check you are attached :)")
