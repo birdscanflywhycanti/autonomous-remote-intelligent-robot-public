@@ -2,7 +2,7 @@
 Rotate given angle, tracked using gyroscope.
 """
 
-import ThunderBorg3 as ThunderBorg # conversion for python 3
+import thunderborg.ThunderBorg3 as ThunderBorg # conversion for python 3
 import time
 import math
 import sys
