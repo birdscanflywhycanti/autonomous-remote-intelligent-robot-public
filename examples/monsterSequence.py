@@ -4,17 +4,17 @@
 # Simple example of a motor sequence script
 
 # Import library functions we need
-import ThunderBorg
+import ThunderBorg3
 import time
 import math
 import sys
 
 # Setup the ThunderBorg
-TB = ThunderBorg.ThunderBorg()
+TB = ThunderBorg3.ThunderBorg()
 #TB.i2cAddress = 0x15                  # Uncomment and change the value if you have changed the board address
 TB.Init()
 if not TB.foundChip:
-    boards = ThunderBorg.ScanForThunderBorg()
+    boards = ThunderBorg3.ScanForThunderBorg()
     if len(boards) == 0:
         print 'No ThunderBorg found, check you are attached :)'
     else:

@@ -4,7 +4,7 @@
 # Creates a web-page interface for MonsterBorg
 
 # Import library functions we need
-import ThunderBorg
+import ThunderBorg3
 import time
 import sys
 import threading
@@ -34,11 +34,11 @@ global running
 global watchdog
 running = True
 
-TB = ThunderBorg.ThunderBorg()
+TB = ThunderBorg3.ThunderBorg()
 #TB.i2cAddress = 0x15                  # Uncomment and change the value if you have changed the board address
 TB.Init()
 if not TB.foundChip:
-    boards = ThunderBorg.ScanForThunderBorg()
+    boards = ThunderBorg3.ScanForThunderBorg()
     if len(boards) == 0:
         print 'No ThunderBorg found, check you are attached :)'
     else:
