@@ -3,7 +3,7 @@ import time
 import math
 import sys
 
-from sensors import PerformDrive, PerformSpin
+from robot import PerformDrive, PerformSpin
 
 # Calculates the angle between a given vector and a known unit vector [up]
 # Returns a the angle needed to rotate from the known vector to match the given vector
