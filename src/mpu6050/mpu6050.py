@@ -4,7 +4,7 @@ import adafruit_mpu6050
 from threading import Thread
 import time
 
-class mpu6050(Thread):
+class MPU6050(Thread):
     def __init__(self):
         Thread.__init__(self)
 

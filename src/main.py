@@ -2,13 +2,18 @@ from algorithms.algorithm import Algorithm
 from robot.accelerometer import PerformDrive
 from robot.gyroscope import PerformSpin
 from robot.drive import pathing, follow
-from robot.mpu6050 import mpu6050
+
+from mpu6050 import MPU6050
+from hcsr04 import HCSR04
+
 from robot.lightening import Thunder
 
 # initialise mpu6050 board
-mpu = mpu6050()
+mpu = MPU6050()
 mpu.setName('mpu6050')
 mpu.start()
+
+hcsr = HCSR04(trigger_pin=16, echo_pin=0, echo_timeout_us=1000000)
 
 TB = Thunder()
 
