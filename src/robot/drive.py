@@ -1,9 +1,11 @@
-import ThunderBorg3 as ThunderBorg # conversion for python 3
-import time
 import math
 import sys
+import time
+
+import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
 from robot import PerformDrive, PerformSpin
+
 
 # Calculates the angle between a given vector and a known unit vector [up]
 # Returns a the angle needed to rotate from the known vector to match the given vector
@@ -12,10 +14,10 @@ def calculate_angle(unit_target_vector):
 
     origin_vector_x, origin_vector_y = (0, 1)
     target_vector_x, target_vector_y = unit_target_vector
-    
+
     # arc-cosine method does not produce signed output
     #####
-    '''
+    """
     magnitude_origin = math.sqrt(origin_vector_x**2 + origin_vector_y**2)
     magnitude_target = math.sqrt(target_vector_x**2 + target_vector_y**2)
 
@@ -26,9 +28,8 @@ def calculate_angle(unit_target_vector):
     magnitude_product = magnitude_origin * magnitude_target
 
     rad = math.acos( product_sum / magnitude_product  )
-    '''
+    """
     ######
-
 
     rad = math.atan2(origin_vector_y, origin_vector_x) - math.atan2(
         target_vector_y, target_vector_x
@@ -49,13 +50,13 @@ def get_move_string(y, x):
         1: "right",
         -1: "left",
     }
-    str = "move "
+    out = "move "
     fragment1 = vertical.get(y, "")
     fragment2 = horizontal.get(x, "")
-    str = str + fragment1
-    str = str + " "
-    str = str + fragment2
-    return str
+    out = out + fragment1
+    out = out + " "
+    out = out + fragment2
+    return out
 
 
 def pathing(path, unit_size, origin=False, curr_angle=0):
@@ -64,11 +65,12 @@ def pathing(path, unit_size, origin=False, curr_angle=0):
 
     instructions = []
 
-    diagonal_unit_distance = math.sqrt(unit_size**2 + unit_size**2) # Pythagorean theorem
+    diagonal_unit_distance = math.sqrt(
+        unit_size**2 + unit_size**2
+    )  # Pythagorean theorem
 
     x, y = (0, 0)
 
-    global_angle = 0
     for coord in path:
         print(coord)
         x_, y_ = coord
@@ -87,21 +89,25 @@ def pathing(path, unit_size, origin=False, curr_angle=0):
 
         target_angle = calculate_angle(unit_target_vector)
 
-        
-        delta_angle = target_angle - curr_angle # calculate the difference in between the current and the target angle 
-        instructions.append((PerformSpin, delta_angle)) # rotate the car to match the target angle by rotating the remaining distance
-        curr_angle = curr_angle + delta_angle # update current angle to match the the robot's angle
-
+        delta_angle = (
+            target_angle - curr_angle
+        )  # calculate the difference in between the current and the target angle
+        instructions.append(
+            (PerformSpin, delta_angle)
+        )  # rotate the car to match the target angle by rotating the remaining distance
+        curr_angle = (
+            curr_angle + delta_angle
+        )  # update current angle to match the the robot's angle
 
         instructions.append((PerformDrive, diagonal_unit_distance))
-
 
         print(get_move_string(vertical, horizontal))
         print("delta angle:" + str(delta_angle) + " global angle:" + str(target_angle))
 
         x, y = x_, y_
     return instructions
-        
+
+
 def follow(instructions):
     for action, arg in instructions:
         action(arg)

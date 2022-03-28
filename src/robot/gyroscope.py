@@ -2,13 +2,13 @@
 Rotate given angle, tracked using gyroscope.
 """
 
-import ThunderBorg3 as ThunderBorg # conversion for python 3
-import time
 import math
 import sys
+import time
 
-import board
 import adafruit_mpu6050
+import board
+import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
 
 # Function to spin an angle in degrees
@@ -26,10 +26,10 @@ def PerformSpin(degrees):
     # Set the motors running
     TB.SetMotor1(driveRight * maxPower)
     TB.SetMotor2(driveLeft * maxPower)
-    
+
     # poll the gyroscope for rotation
     # NOTE: sampling limited by real-time clock on system (0.1ms theoretical minimum, but experimentally encountered errors)
-    sampling = 0.08 # poll every <sampling> seconds, fine tune to minimise overshooting target rotation
+    sampling = 0.08  # poll every <sampling> seconds, fine tune to minimise overshooting target rotation
     total_rotation = 0
 
     while True:
@@ -38,22 +38,28 @@ def PerformSpin(degrees):
         abs_z = abs(z)
         sample = abs_z * sampling
 
-        #print("Gyro X:%.2f, Y: %.2f, Z: %.2f rad/s" % (x, y, z))        
-        print("Gyro: X:%.2f, Y: %.2f, Z: %.2f deg/s \t sample:%.2f \t total:%.2f" % (x, y, z, sample, total_rotation))
-        #print(total_rotation)
+        # print("Gyro X:%.2f, Y: %.2f, Z: %.2f rad/s" % (x, y, z))
+        print(
+            "Gyro: X:%.2f, Y: %.2f, Z: %.2f deg/s \t sample:%.2f \t total:%.2f"
+            % (x, y, z, sample, total_rotation)
+        )
+        # print(total_rotation)
 
         # NOTE: z-axis experimentally defined as 2d plane orientation
-        total_rotation += sample # increment degree rotation by current rotation velocity, divided by sampling time
+        total_rotation += sample  # increment degree rotation by current rotation velocity, divided by sampling time
 
         # if exceeded target exit
         if total_rotation >= degrees:
-            break   # exit once achieved target rotation
+            break  # exit once achieved target rotation
         # if predicted to exceed during sleep, sleep for predicted time to target, then exit
         elif (total_rotation + sample) >= degrees:
             # total degrees left in rotation (degress-total_rotation) divided by abs(z) (positive rotational velocity) gives time to sleep (in seconds) before reaching target
-            sleep = (degrees-total_rotation)/abs_z
+            sleep = (degrees - total_rotation) / abs_z
 
-            print("Assuming constant rotation of Z:%.2f, sleeping for %.2f seconds to rotate %.2f degrees" % (abs_z, sleep, (degrees-total_rotation)))
+            print(
+                "Assuming constant rotation of Z:%.2f, sleeping for %.2f seconds to rotate %.2f degrees"
+                % (abs_z, sleep, (degrees - total_rotation))
+            )
             time.sleep(sleep)
 
             # NOTE: this will set total rotation to target, which is only correct assuming rotation halts immediately and rotational velocity remains constant
@@ -68,6 +74,7 @@ def PerformSpin(degrees):
 
     print(f"total rotation: {total_rotation}")
 
+
 if __name__ == "__main__":
     # Setup the ThunderBorg
     TB = ThunderBorg.ThunderBorg()
@@ -79,7 +86,8 @@ if __name__ == "__main__":
             print("No ThunderBorg found, check you are attached :)")
         else:
             print(
-                "No ThunderBorg at address %02X, but we did find boards:" % (TB.i2cAddress)
+                "No ThunderBorg at address %02X, but we did find boards:"
+                % (TB.i2cAddress)
             )
             for board in boards:
                 print("    %02X (%d)" % (board, board))
@@ -91,10 +99,10 @@ if __name__ == "__main__":
     TB.SetCommsFailsafe(False)  # Disable the communications failsafe
 
     # Power settings
-    voltageIn = 9.6   # Total battery voltage to the ThunderBorg
+    voltageIn = 9.6  # Total battery voltage to the ThunderBorg
 
     # NOTE: limiter has lower bound to power motors, ~0.4 experimental lower bound
-    limiter = 0.6     # utilise only <limiter>% of power, to slow down actions
+    limiter = 0.6  # utilise only <limiter>% of power, to slow down actions
 
     voltageOut = (
         12.0 * limiter

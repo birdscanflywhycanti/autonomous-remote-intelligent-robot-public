@@ -1,6 +1,7 @@
 # orient self from a map fragment
 import numpy as np
 
+
 def locate(matrix, fragment):
     """ Locate map fragment within known map.
     Returns all potential locations of agent within matrix:

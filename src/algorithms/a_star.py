@@ -2,6 +2,7 @@ from pathfinding.core.diagonal_movement import DiagonalMovement
 from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
 
+
 def a_star(matrix, start_node, end_node):
     grid = Grid(matrix=matrix)
 

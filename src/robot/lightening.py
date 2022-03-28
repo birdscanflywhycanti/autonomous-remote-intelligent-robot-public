@@ -1,12 +1,14 @@
 # thunderborg motor class
-import ThunderBorg3 as ThunderBorg # conversion for python 3
 import sys
+
+import ThunderBorg3 as ThunderBorg  # conversion for python 3
+
 
 class Thunder:
     def __init__(self):
         # Setup the ThunderBorg
         self.thunder = ThunderBorg.ThunderBorg()
-        
+
         self.i2cAddress = self.thunder.i2cAddress
 
         # self.i2cAddress = 0x15                  # Uncomment and change the value if you have changed the board address
@@ -18,7 +20,8 @@ class Thunder:
                 print("No ThunderBorg found, check you are attached :)")
             else:
                 print(
-                    "No ThunderBorg at address %02X, but we did find boards:" % (self.i2cAddress)
+                    "No ThunderBorg at address %02X, but we did find boards:"
+                    % (self.i2cAddress)
                 )
                 for board in boards:
                     print("%02X (%d)" % (board, board))
@@ -27,14 +30,14 @@ class Thunder:
                 )
                 print("TB.i2cAddress = 0x%02X" % (boards[0]))
             sys.exit()
-        
+
         self.thunder.SetCommsFailsafe(False)  # Disable the communications failsafe
 
         # Power settings
-        voltageIn = 9.6   # Total battery voltage to the ThunderBorg
+        voltageIn = 9.6  # Total battery voltage to the ThunderBorg
 
         # NOTE: limiter has lower bound to power motors, ~0.4 experimental lower bound
-        limiter = 0.6     # utilise only <limiter>% of power, to slow down actions
+        limiter = 0.6  # utilise only <limiter>% of power, to slow down actions
 
         voltageOut = (
             12.0 * limiter
@@ -45,7 +48,7 @@ class Thunder:
             maxPower = 1.0
         else:
             maxPower = voltageOut / float(voltageIn)
-    
+
     def Init(self):
         self.thunder.Init()
 

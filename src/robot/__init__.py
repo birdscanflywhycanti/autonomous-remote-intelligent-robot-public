@@ -1,4 +1,4 @@
 from accelerometer import PerformDrive
+from drive import follow, pathing
 from gyroscope import PerformSpin
-from drive import pathing, follow
 from lightening import Thunder
