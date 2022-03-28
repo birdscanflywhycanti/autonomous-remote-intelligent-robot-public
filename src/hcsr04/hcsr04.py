@@ -1,11 +1,13 @@
 from machine import Pin, time_pulse_us
 from utime import sleep_us
+from threading import Thread
+import time
 
 __version__ = '0.2.1'
 __author__ = 'Roberto Sánchez'
 __license__ = "Apache License 2.0. https://www.apache.org/licenses/LICENSE-2.0"
 
-class HCSR04:
+class HCSR04(Thread):
     """
     Driver to use the untrasonic sensor HC-SR04.
     The sensor range is between 2cm and 4m.
@@ -28,6 +30,9 @@ class HCSR04:
 
         # Init echo pin (in)
         self.echo = Pin(echo_pin, mode=Pin.IN, pull=None)
+
+        self.distance = None
+        self.poll = 0.01
 
     def _send_pulse_and_wait(self):
         """
@@ -80,3 +85,17 @@ class HCSR04:
         # 0.034320 cm/us that is 1cm each 29.1us
         cms = (pulse_time / 2) / 29.1
         return cms
+
+    def run(self, unit):
+        while True:
+            self.distance = unit()   # update with new echo
+
+            time.sleep(self.poll)
+
+if __name__ == "__main__":
+    hcsr = HCSR04(trigger_pin=16, echo_pin=0, echo_timeout_us=1000000)
+    hcsr.setName('HCSR04')
+    hcsr.start()
+
+    while True:
+        print(f"distance: {hcsr.distance}")

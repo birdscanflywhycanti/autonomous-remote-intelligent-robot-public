@@ -23,3 +23,12 @@ class MPU6050(Thread):
             self.acceleration = self.mpu.acceleration
 
             time.sleep(self.poll)
+
+if __name__ == "__main__":
+    # initialise mpu6050 board
+    mpu = MPU6050()
+    mpu.setName('MPU6050')
+    mpu.start()
+
+    while True:
+        print(f"accelerometer: {mpu.acceleration}\ngyro: {mpu.gyro}")

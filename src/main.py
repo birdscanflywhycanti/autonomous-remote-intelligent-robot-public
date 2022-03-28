@@ -10,10 +10,12 @@ from robot.lightening import Thunder
 
 # initialise mpu6050 board
 mpu = MPU6050()
-mpu.setName('mpu6050')
+mpu.setName('MPU6050')
 mpu.start()
 
 hcsr = HCSR04(trigger_pin=16, echo_pin=0, echo_timeout_us=1000000)
+hcsr.setName('HCSR04')
+hcsr.start()
 
 TB = Thunder()
 
