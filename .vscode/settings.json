@@ -1,3 +1,4 @@
 {
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
+    "python.pythonPath": "/Users/zacharysmith/Documents/GitHub/2022-comp5010-group-proj-autonomous-remote-intelligent-robot/venv/bin/python"
 }

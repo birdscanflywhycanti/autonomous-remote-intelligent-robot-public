@@ -1,6 +1,5 @@
-import a_star
-import d_star_lite
-
+from algorithms.a_star import a_star
+from algorithms.d_star_lite import d_star_lite
 
 class Algorithm:
     def __init__(self, matrix, start_node, end_node):

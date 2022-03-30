@@ -1,1 +1,1 @@
-from hcsr04 import HCSR04
+from hcsr04.hcsr04 import HCSR04

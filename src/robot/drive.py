@@ -4,8 +4,8 @@ import time
 
 import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
-from robot import PerformDrive, PerformSpin
-
+from robot.gyroscope import PerformSpin
+from robot.accelerometer import PerformDrive
 
 # Calculates the angle between a given vector and a known unit vector [up]
 # Returns a the angle needed to rotate from the known vector to match the given vector

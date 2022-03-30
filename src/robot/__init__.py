@@ -1,4 +1,3 @@
-from accelerometer import PerformDrive
-from drive import follow, pathing
-from gyroscope import PerformSpin
-from lightening import Thunder
+from robot.accelerometer import PerformDrive
+from robot.drive import follow, pathing
+from robot.gyroscope import PerformSpin

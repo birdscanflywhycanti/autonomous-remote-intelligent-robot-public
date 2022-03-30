@@ -1,1 +1,1 @@
-from ThunderBorg3 import ThunderBorg
+from ThunderBorg3.ThunderBorg3 import ThunderBorg
