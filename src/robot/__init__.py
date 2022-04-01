@@ -3,4 +3,4 @@ Please see help pages for accelerometer, drive and gyroscope for more informatio
 """
 from robot.accelerometer import perform_drive
 from robot.drive import follow, pathing
-from robot.gyroscope import PerformSpin
+from robot.gyroscope import perform_spin

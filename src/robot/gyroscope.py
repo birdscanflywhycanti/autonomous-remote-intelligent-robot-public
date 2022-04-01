@@ -12,24 +12,32 @@ import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
 
 # Function to spin an angle in degrees
-def PerformSpin(degrees):
+def perform_spin(degrees):
+    """Spin an angle in degrees.
+
+    Args:
+        degrees (float): angle to spin in degrees.
+    """
     if degrees < 0.0:
         # Left turn
-        driveLeft = -1.0
-        driveRight = +1.0
+        drive_left = -1.0
+        drive_right = +1.0
         degrees *= -1
     else:
         # Right turn
-        driveLeft = +1.0
-        driveRight = -1.0
+        drive_left = +1.0
+        drive_right = -1.0
 
     # Set the motors running
-    TB.SetMotor1(driveRight * maxPower)
-    TB.SetMotor2(driveLeft * maxPower)
+    TB.SetMotor1(drive_right * MAX_POWER)
+    TB.SetMotor2(drive_left * MAX_POWER)
 
     # poll the gyroscope for rotation
-    # NOTE: sampling limited by real-time clock on system (0.1ms theoretical minimum, but experimentally encountered errors)
-    sampling = 0.08  # poll every <sampling> seconds, fine tune to minimise overshooting target rotation
+    # NOTE: sampling limited by real-time clock on system \
+    # (0.1ms theoretical minimum, but experimentally encountered errors)
+
+    # poll every <sampling> seconds, fine tune to minimise overshooting target rotation
+    sampling = 0.08
     total_rotation = 0
 
     while True:
@@ -46,14 +54,17 @@ def PerformSpin(degrees):
         # print(total_rotation)
 
         # NOTE: z-axis experimentally defined as 2d plane orientation
-        total_rotation += sample  # increment degree rotation by current rotation velocity, divided by sampling time
+
+        # increment degree rotation by current rotation velocity, divided by sampling time
+        total_rotation += sample
 
         # if exceeded target exit
         if total_rotation >= degrees:
             break  # exit once achieved target rotation
         # if predicted to exceed during sleep, sleep for predicted time to target, then exit
         elif (total_rotation + sample) >= degrees:
-            # total degrees left in rotation (degress-total_rotation) divided by abs(z) (positive rotational velocity) gives time to sleep (in seconds) before reaching target
+            # total degrees left in rotation (degress-total_rotation) divided by abs(z)\
+            # (positive rotational velocity) gives time to sleep (in seconds) before reaching target
             sleep = (degrees - total_rotation) / abs_z
 
             print(
@@ -62,8 +73,12 @@ def PerformSpin(degrees):
             )
             time.sleep(sleep)
 
-            # NOTE: this will set total rotation to target, which is only correct assuming rotation halts immediately and rotational velocity remains constant
-            # in non-demo system current orientation should be independently tracked, not adjusted using this approximation
+            # NOTE: this will set total rotation to target, which is only correct \
+            # assuming rotation halts immediately and rotational velocity remains constant
+
+            # in non-demo system current orientation should be independently \
+            # tracked, not adjusted using this approximation
+
             total_rotation += abs_z * sleep  # update final rotation for tracking
             break
 
@@ -99,23 +114,23 @@ if __name__ == "__main__":
     TB.SetCommsFailsafe(False)  # Disable the communications failsafe
 
     # Power settings
-    voltageIn = 9.6  # Total battery voltage to the ThunderBorg
+    VOLTAGE_IN = 9.6  # Total battery voltage to the ThunderBorg
 
     # NOTE: limiter has lower bound to power motors, ~0.4 experimental lower bound
-    limiter = 0.6  # utilise only <limiter>% of power, to slow down actions
+    LIMITER = 0.6  # utilise only <limiter>% of power, to slow down actions
 
-    voltageOut = (
-        12.0 * limiter
+    VOLTAGE_OUT = (
+        12.0 * LIMITER
     )  # Maximum motor voltage, we limit it to 95% to allow the RPi to get uninterrupted power
 
     # Setup the power limits
-    if voltageOut > voltageIn:
-        maxPower = 1.0
+    if VOLTAGE_OUT > VOLTAGE_IN:
+        MAX_POWER = 1.0
     else:
-        maxPower = voltageOut / float(voltageIn)
+        MAX_POWER = VOLTAGE_OUT / float(VOLTAGE_IN)
 
     # initialise gyroscope board
     i2c = board.I2C()  # uses board.SCL and board.SDA
     mpu = adafruit_mpu6050.MPU6050(i2c)
 
-    PerformSpin(90)
+    perform_spin(90)

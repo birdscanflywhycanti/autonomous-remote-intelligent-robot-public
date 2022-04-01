@@ -3,7 +3,7 @@
 import math
 
 from robot.accelerometer import perform_drive
-from robot.gyroscope import PerformSpin
+from robot.gyroscope import perform_spin
 
 
 def calculate_angle(unit_target_vector):
@@ -117,7 +117,7 @@ def pathing(path, unit_size, origin=False, curr_angle=0):
             target_angle - curr_angle
         )  # calculate the difference in between the current and the target angle
         instructions.append(
-            (PerformSpin, delta_angle)
+            (perform_spin, delta_angle)
         )  # rotate the car to match the target angle by rotating the remaining distance
         curr_angle = (
             curr_angle + delta_angle
