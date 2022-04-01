@@ -12,25 +12,33 @@ import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
 
 # Function to drive a distance in meters
-def PerformDrive(meters):
+def perform_drive(meters):
+    """Drive a distance in meters.
+
+    Args:
+        meters (float): distance to drive in meters.
+    """
+
     if meters < 0.0:
         # Reverse drive
-        driveLeft = -1.0
-        driveRight = -1.0
+        drive_left = -1.0
+        drive_right = -1.0
         meters *= -1
     else:
         # Forward drive
-        driveLeft = +1.0
-        driveRight = +1.0
+        drive_left = +1.0
+        drive_right = +1.0
 
     # Perform the motion
     # Set the motors running
-    TB.SetMotor1(driveRight * maxPower)
-    TB.SetMotor2(driveLeft * maxPower)
+    TB.SetMotor1(drive_right * maxPower)
+    TB.SetMotor2(drive_left * maxPower)
 
     # poll the gyroscope for acceleration
     # NOTE: sampling limited by real-time clock on system (0.1ms theoretical minimum, but experimentally encountered errors)
-    sampling = 0.08  # poll every <sampling> seconds, fine tune to minimise overshooting target rotation
+
+    # poll every <sampling> seconds, fine tune to minimise overshooting target rotation
+    sampling = 0.08
     total_motion = 0
 
     while True:
@@ -59,7 +67,8 @@ def PerformDrive(meters):
             break  # exit once achieved target rotation
         # if predicted to exceed during sleep, sleep for predicted time to target, then exit
         elif (total_motion + sample) >= meters:
-            # total degrees left in metres (meters-total_motion) divided by abs(z) (positive acceleration) gives time to sleep (in seconds) before reaching target
+            # total degrees left in metres (meters-total_motion) divided by abs(z)
+            # (positive acceleration) gives time to sleep (in seconds) before reaching target
             sleep = (meters - total_motion) / velocity
 
             print(
@@ -124,4 +133,4 @@ if __name__ == "__main__":
     i2c = board.I2C()  # uses board.SCL and board.SDA
     mpu = adafruit_mpu6050.MPU6050(i2c)
 
-    PerformDrive(0.5)
+    perform_drive(0.5)
