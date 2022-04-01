@@ -58,9 +58,9 @@ voltageOut = 12.0 * 0.95                # Maximum motor voltage, we limit it to 
 
 # Setup the power limits
 if voltageOut > voltageIn:
-    maxPower = 1.0
+    max_power = 1.0
 else:
-    maxPower = voltageOut / float(voltageIn)
+    max_power = voltageOut / float(voltageIn)
 
 # Timeout thread
 class Watchdog(threading.Thread):
@@ -220,8 +220,8 @@ class WebServer(SocketServer.BaseRequestHandler):
             httpText += '</center></body></html>'
             self.send(httpText)
             # Set the outputs
-            driveLeft *= maxPower
-            driveRight *= maxPower
+            driveLeft *= max_power
+            driveRight *= max_power
             TB.SetMotor1(driveRight)
             TB.SetMotor2(driveLeft)
         elif getPath.startswith('/photo'):

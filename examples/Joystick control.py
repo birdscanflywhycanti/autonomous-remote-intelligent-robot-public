@@ -53,9 +53,9 @@ voltageOut = 12.0 * 0.95                # Maximum motor voltage, we limit it to 
 
 # Setup the power limits
 if voltageOut > voltageIn:
-    maxPower = 1.0
+    max_power = 1.0
 else:
-    maxPower = voltageOut / float(voltageIn)
+    max_power = voltageOut / float(voltageIn)
 
 # Show battery monitoring settings
 battMin, battMax = TB.GetBatteryMonitoringLimits()
@@ -157,8 +157,8 @@ try:
                     driveLeft *= slowFactor
                     driveRight *= slowFactor
                 # Set the motors to the new speeds
-                TB.SetMotor1(driveRight * maxPower)
-                TB.SetMotor2(driveLeft * maxPower)
+                TB.SetMotor1(driveRight * max_power)
+                TB.SetMotor2(driveLeft * max_power)
         # Change LEDs to purple to show motor faults
         if TB.GetDriveFault1() or TB.GetDriveFault2():
             if ledBatteryMode:

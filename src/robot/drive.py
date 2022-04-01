@@ -5,6 +5,8 @@ import math
 from robot.accelerometer import perform_drive
 from robot.gyroscope import perform_spin
 
+import time
+
 
 def calculate_angle(unit_target_vector):
     """Calculates the angle between a given vector and a known unit vector [facing up]
@@ -88,10 +90,6 @@ def pathing(path, unit_size, origin=False, curr_angle=0):
 
     instructions = []
 
-    diagonal_unit_distance = math.sqrt(
-        unit_size**2 + unit_size**2
-    )  # Pythagorean theorem
-
     x, y = (0, 0)
 
     for coord in path:
@@ -116,23 +114,41 @@ def pathing(path, unit_size, origin=False, curr_angle=0):
         delta_angle = (
             target_angle - curr_angle
         )  # calculate the difference in between the current and the target angle
-        instructions.append(
-            (perform_spin, delta_angle)
-        )  # rotate the car to match the target angle by rotating the remaining distance
+
+        if abs(delta_angle) > 0:
+            instructions.append(
+                (perform_spin, delta_angle)
+            )  # rotate the car to match the target angle by rotating the remaining distance
+
         curr_angle = (
             curr_angle + delta_angle
         )  # update current angle to match the the robot's angle
 
-        instructions.append((perform_drive, diagonal_unit_distance))
+        drive_distance = math.sqrt(
+            (vertical*unit_size)**2 + (horizontal*unit_size)**2
+        )  # Pythagorean theorem
+        instructions.append((perform_drive, drive_distance))
 
         print(get_move_string(vertical, horizontal))
         print("delta angle:" + str(delta_angle) + " global angle:" + str(target_angle))
 
         x, y = x_, y_
+
+    """
+    # reorient to face north
+    delta_angle = (
+        0 - curr_angle
+    )  # calculate the difference in between the current and the target angle
+
+    instructions.append(
+        (perform_spin, delta_angle)
+    )  # rotate the car to match the target angle by rotating the remaining distance
+    """
+
     return instructions
 
 
-def follow(instructions):
+def follow(instructions, TB, mpu, max_power):
     """Follows a list of instructions
 
     Args:
@@ -140,4 +156,5 @@ def follow(instructions):
     """
 
     for action, arg in instructions:
-        action(arg)
+        action(arg, TB, mpu, max_power)
+        time.sleep(0.5)

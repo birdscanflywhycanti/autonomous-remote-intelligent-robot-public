@@ -5,21 +5,12 @@ import sys
 
 import ThunderBorg3 as ThunderBorg  # conversion for python 3
 from algorithms.algorithm import Algorithm
-from hcsr04 import HCSR04
+#from hcsr04 import HCSR04
 from mpu6050 import MPU6050
 from robot.drive import follow, pathing
 
 # from robot.accelerometer import perform_drive
 # from robot.gyroscope import perform_spin
-
-# initialise mpu6050 board
-mpu = MPU6050()
-mpu.setName("MPU6050")
-mpu.start()
-
-hcsr = HCSR04(trigger_pin=16, echo_pin=0, echo_timeout_us=1000000)
-hcsr.setName("HCSR04")
-hcsr.start()
 
 # Setup the ThunderBorg
 TB = ThunderBorg.ThunderBorg()
@@ -45,24 +36,16 @@ if not TB.foundChip:
 
 TB.SetCommsFailsafe(False)  # Disable the communications failsafe
 
-# Power settings
-VOLTAGE_IN = 9.6  # Total battery voltage to the ThunderBorg
+# initialise mpu6050 board
+mpu = MPU6050()
+mpu.setName("MPU6050")
+mpu.start()
 
-# NOTE: limiter has lower bound to power motors, ~0.4 experimental lower bound
-LIMITER = 0.6  # utilise only <limiter>% of power, to slow down actions
+#hcsr = HCSR04(trigger_pin=16, echo_pin=0, echo_timeout_us=1000000)
+#hcsr.setName("HCSR04")
+#hcsr.start()
 
-VOLTAGE_OUT = (
-    12.0 * LIMITER
-)  # Maximum motor voltage, we limit it to 95% to allow the RPi to get uninterrupted power
-
-# Setup the power limits
-if VOLTAGE_OUT > VOLTAGE_IN:
-    MAX_POWER = 1.0
-else:
-    MAX_POWER = VOLTAGE_OUT / float(VOLTAGE_IN)
-
-
-def main():
+def main(TB, mpu):
     """Main function used to run the application
     Key variables:
         input_matrix: a matrix representing the space the robot is in
@@ -70,7 +53,8 @@ def main():
         end_node: the node the robot is trying to reach
     """
     input_matrix = [
-        [1, 0, 1, 1],
+        [1, 0, 0, 1],
+        [1, 0, 0, 1],
         [1, 0, 1, 0],
         [1, 0, 1, 1],
         [1, 0, 0, 1],
@@ -79,14 +63,42 @@ def main():
     start_node = (0, 0)
     end_node = (3, 0)
 
+    # Power settings
+    VOLTAGE_IN = 9.6  # Total battery voltage to the ThunderBorg
+
+    # NOTE: limiter has lower bound to power motors, ~0.4 experimental lower bound
+    LIMITER = 0.6  # utilise only <limiter>% of power, to slow down actions
+
+    VOLTAGE_OUT = (
+        12.0 * LIMITER
+    )  # Maximum motor voltage, we limit it to 95% to allow the RPi to get uninterrupted power
+
+    # Setup the power limits
+    if VOLTAGE_OUT > VOLTAGE_IN:
+        max_power = 1.0
+    else:
+        max_power = VOLTAGE_OUT / float(VOLTAGE_IN)
+
     algorithm = Algorithm(matrix=input_matrix, start_node=start_node, end_node=end_node)
     path = algorithm.use_a_star()
 
-    instructions = pathing(path, 0.4)
+    instructions = pathing(path, 1)
     print(instructions)
 
-    follow(instructions)
-
+    follow(instructions, TB, mpu, max_power)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main(TB, mpu)
+    except:
+        # stop motors
+        TB.SetCommsFailsafe(False)
+        TB.SetLeds(0,0,0)
+        TB.MotorsOff()
+
+        # end sensor thread
+        mpu.join()
+
+        # exit program
+        print("Stopped")
+        sys.exit()

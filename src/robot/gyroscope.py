@@ -12,12 +12,16 @@ import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
 
 # Function to spin an angle in degrees
-def perform_spin(degrees):
+def perform_spin(degrees, TB, mpu, max_power):
     """Spin an angle in degrees.
 
     Args:
         degrees (float): angle to spin in degrees.
     """
+
+
+    power = max_power*0.75
+
     if degrees < 0.0:
         # Left turn
         drive_left = -1.0
@@ -29,8 +33,8 @@ def perform_spin(degrees):
         drive_right = -1.0
 
     # Set the motors running
-    TB.SetMotor1(drive_right * MAX_POWER)
-    TB.SetMotor2(drive_left * MAX_POWER)
+    TB.SetMotor1(drive_right * power)
+    TB.SetMotor2(drive_left * power)
 
     # poll the gyroscope for rotation
     # NOTE: sampling limited by real-time clock on system \
@@ -125,9 +129,9 @@ if __name__ == "__main__":
 
     # Setup the power limits
     if VOLTAGE_OUT > VOLTAGE_IN:
-        MAX_POWER = 1.0
+        max_power = 1.0
     else:
-        MAX_POWER = VOLTAGE_OUT / float(VOLTAGE_IN)
+        max_power = VOLTAGE_OUT / float(VOLTAGE_IN)
 
     # initialise gyroscope board
     i2c = board.I2C()  # uses board.SCL and board.SDA

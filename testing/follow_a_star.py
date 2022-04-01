@@ -54,9 +54,9 @@ voltageOut = (
 
 # Setup the power limits
 if voltageOut > voltageIn:
-    maxPower = 1.0
+    max_power = 1.0
 else:
-    maxPower = voltageOut / float(voltageIn)
+    max_power = voltageOut / float(voltageIn)
 
 # initialise gyroscope board
 i2c = board.I2C()  # uses board.SCL and board.SDA
@@ -65,8 +65,8 @@ mpu = adafruit_mpu6050.MPU6050(i2c)
 # Function to perform a general movement
 def PerformMove(driveLeft, driveRight, numSeconds):
     # Set the motors running
-    TB.SetMotor1(driveRight * maxPower)
-    TB.SetMotor2(driveLeft * maxPower)
+    TB.SetMotor1(driveRight * max_power)
+    TB.SetMotor2(driveLeft * max_power)
     # Wait for the time
     time.sleep(numSeconds)
     # Turn the motors off
@@ -86,8 +86,8 @@ def PerformSpin(degrees):
         driveRight = -1.0
 
     # Set the motors running
-    TB.SetMotor1(driveRight * maxPower)
-    TB.SetMotor2(driveLeft * maxPower)
+    TB.SetMotor1(driveRight * max_power)
+    TB.SetMotor2(driveLeft * max_power)
     
     # poll the gyroscope for rotation
     # NOTE: sampling limited by real-time clock on system (0.1ms theoretical minimum, but experimentally encountered errors)

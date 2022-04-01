@@ -1,11 +1,17 @@
 ## shutdown
 ```bash
-sudo shutdown -h now
+sudo shutdown -P now
 ```
 
 ## ssh command usage:
+*On COMP5010 router*
 ```bash
 ssh pi@192.168.11.11
+```
+
+*On Pixel hotspot*
+```bash
+ssh pi@192.168.18.55
 ```
 
 ## scp command usage:

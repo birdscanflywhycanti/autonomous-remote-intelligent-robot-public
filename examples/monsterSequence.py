@@ -37,15 +37,15 @@ voltageOut = 12.0 * 0.95                # Maximum motor voltage, we limit it to 
 
 # Setup the power limits
 if voltageOut > voltageIn:
-    maxPower = 1.0
+    max_power = 1.0
 else:
-    maxPower = voltageOut / float(voltageIn)
+    max_power = voltageOut / float(voltageIn)
 
 # Function to perform a general movement
 def PerformMove(driveLeft, driveRight, numSeconds):
     # Set the motors running
-    TB.SetMotor1(driveRight * maxPower)
-    TB.SetMotor2(driveLeft * maxPower)
+    TB.SetMotor1(driveRight * max_power)
+    TB.SetMotor2(driveLeft * max_power)
     # Wait for the time
     time.sleep(numSeconds)
     # Turn the motors off

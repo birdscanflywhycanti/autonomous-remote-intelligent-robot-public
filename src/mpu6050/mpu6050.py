@@ -17,7 +17,7 @@ class MPU6050(Thread):
         self.gyro = None
         self.acceleration = None
 
-        self.poll = 0.01  # poll every <self.poll> seconds
+        self.poll = 0.05  # poll every <self.poll> seconds
 
     def run(self):
         while True:

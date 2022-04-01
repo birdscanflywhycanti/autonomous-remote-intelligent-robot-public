@@ -12,12 +12,13 @@ import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
 
 # Function to drive a distance in meters
-def perform_drive(meters):
+def perform_drive(meters, TB, mpu, max_power):
     """Drive a distance in meters.
 
     Args:
         meters (float): distance to drive in meters.
     """
+    power = max_power*0.75
 
     if meters < 0.0:
         # Reverse drive
@@ -31,8 +32,8 @@ def perform_drive(meters):
 
     # Perform the motion
     # Set the motors running
-    TB.SetMotor1(drive_right * maxPower)
-    TB.SetMotor2(drive_left * maxPower)
+    TB.SetMotor1(drive_right * power)
+    TB.SetMotor2(drive_left * power)
 
     # poll the gyroscope for acceleration
     # NOTE: sampling limited by real-time clock on system (0.1ms theoretical minimum, but experimentally encountered errors)
@@ -41,13 +42,15 @@ def perform_drive(meters):
     sampling = 0.08
     total_motion = 0
 
+    velocity = 0
+
     while True:
         x, y, z = mpu.acceleration
         # x, y, z = math.degrees(x), math.degrees(y), math.degrees(z)
-        abs_z = abs(z)
 
         # Calculate current velocity of vehicle from acceleration by time since last sample
-        velocity = abs_z * sampling  # velocity = acceleration * time
+        change_in_velocity = z * sampling  # velocity = acceleration * time
+        velocity += change_in_velocity
         sample = velocity * sampling
 
         print("Acceleration X:%.2f, Y: %.2f, Z: %.2f m/s^2" % (x, y, z))
@@ -55,7 +58,7 @@ def perform_drive(meters):
             "Velocity: X:%.2f, Y: %.2f, Z: %.2f m/s \t sample:%.2f \t total:%.2f"
             % (x, y, z, sample, total_motion)
         )
-        # print(total_rotation)
+        # print(total_motion)
 
         # NOTE: z-axis experimentally defined as 2d plane forward axis
         total_motion += (
@@ -87,7 +90,7 @@ def perform_drive(meters):
     # Turn the motors off
     TB.MotorsOff()
 
-    print(f"total rotation: {total_motion}")
+    print(f"total motion: {total_motion}")
 
 
 if __name__ == "__main__":
@@ -125,9 +128,9 @@ if __name__ == "__main__":
 
     # Setup the power limits
     if voltageOut > voltageIn:
-        maxPower = 1.0
+        max_power = 1.0
     else:
-        maxPower = voltageOut / float(voltageIn)
+        max_power = voltageOut / float(voltageIn)
 
     # initialise gyroscope board
     i2c = board.I2C()  # uses board.SCL and board.SDA
