@@ -1,4 +1,4 @@
-# orient self from a map fragment
+"""Functionallity to orient self from a map fragment."""
 import numpy as np
 
 
@@ -35,6 +35,13 @@ def locate(matrix, fragment):
     return locations
 
 if __name__ == "__main__":
+    """Test functionallity.
+    
+    Variables:
+        matrix: a matrix representing the space the robot is in
+        fragment: the fragment of the map the robot is currently in
+        location: a list of nodes representing where the robot could be
+    """
     matrix = [
         [1, 0, 1, 1], 
         [1, 0, 1, 0], 
