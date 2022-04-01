@@ -9,8 +9,8 @@ from hcsr04 import HCSR04
 from mpu6050 import MPU6050
 from robot.drive import follow, pathing
 
-# from robot.accelerometer import PerformDrive
-# from robot.gyroscope import PerformSpin
+# from robot.accelerometer import perform_drive
+# from robot.gyroscope import perform_spin
 
 # initialise mpu6050 board
 mpu = MPU6050()
