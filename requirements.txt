@@ -1,4 +1,8 @@
 smbus
+wheel
+rpi_ws281x>=4.0.0
+setuptools_scm
+setuptools>=40.8.0
 Adafruit-Blinka==7.1.2
 adafruit-circuitpython-busdevice==5.1.8
 adafruit-circuitpython-mpu6050==1.1.10

@@ -48,4 +48,4 @@ pip install * -f ./ --no-index
 ### Troubleshooting
 1. May need to use `python3 -m pip ...` to target Python3 pip environment`
 2. May need to manually install setuptools, setuptools_scm, wheel and tomli before being able to run wildcard install. Wildcard install is alphabetical(?), so some packages may attempt install before dependencies and fail, requiring manual direction to install packages in order.
-3. If encountering continued issues with additioanl dependencies, try running with `--no-deps` flag.
+3. If encountering continued issues with requiring additional dependencies, try running with `--no-deps` flag.
