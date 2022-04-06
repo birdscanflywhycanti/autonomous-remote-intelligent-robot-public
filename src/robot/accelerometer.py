@@ -10,6 +10,7 @@ import adafruit_mpu6050
 import board
 import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
+import logging
 
 # Function to drive a distance in meters
 def perform_drive(meters, TB, mpu, max_power):
@@ -53,8 +54,8 @@ def perform_drive(meters, TB, mpu, max_power):
         velocity += change_in_velocity
         sample = velocity * sampling
 
-        print("Acceleration X:%.2f, Y: %.2f, Z: %.2f m/s^2" % (x, y, z))
-        print(
+        logging.debug("Acceleration X:%.2f, Y: %.2f, Z: %.2f m/s^2" % (x, y, z))
+        logging.debug(
             "Velocity: X:%.2f, Y: %.2f, Z: %.2f m/s \t sample:%.2f \t total:%.2f"
             % (x, y, z, sample, total_motion)
         )
@@ -74,7 +75,7 @@ def perform_drive(meters, TB, mpu, max_power):
             # (positive acceleration) gives time to sleep (in seconds) before reaching target
             sleep = (meters - total_motion) / velocity
 
-            print(
+            logging.debug(
                 "Assuming constant velocity of Z:%.2f, sleeping for %.2f seconds to drive %.2f meters"
                 % (velocity, sleep, (meters - total_motion))
             )
@@ -90,10 +91,13 @@ def perform_drive(meters, TB, mpu, max_power):
     # Turn the motors off
     TB.MotorsOff()
 
-    print(f"total motion: {total_motion}")
+    logging.debug(f"total motion: {total_motion}")
 
 
 if __name__ == "__main__":
+    # enable debug logging
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
+
     # Setup the ThunderBorg
     TB = ThunderBorg.ThunderBorg()
     # TB.i2cAddress = 0x15                  # Uncomment and change the value if you have changed the board address
@@ -101,18 +105,18 @@ if __name__ == "__main__":
     if not TB.foundChip:
         boards = ThunderBorg.ScanForThunderBorg()
         if len(boards) == 0:
-            print("No ThunderBorg found, check you are attached :)")
+            logging.warning("No ThunderBorg found, check you are attached :)")
         else:
-            print(
+            logging.warning(
                 "No ThunderBorg at address %02X, but we did find boards:"
                 % (TB.i2cAddress)
             )
             for board in boards:
-                print("    %02X (%d)" % (board, board))
-            print(
+                logging.info("    %02X (%d)" % (board, board))
+            logging.info(
                 "If you need to change the I2C address change the setup line so it is correct, e.g."
             )
-            print("TB.i2cAddress = 0x%02X" % (boards[0]))
+            logging.info("TB.i2cAddress = 0x%02X" % (boards[0]))
         sys.exit()
     TB.SetCommsFailsafe(False)  # Disable the communications failsafe
 

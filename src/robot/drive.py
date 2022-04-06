@@ -6,6 +6,7 @@ from robot.accelerometer import perform_drive
 from robot.gyroscope import perform_spin
 
 import time
+import logging
 
 
 def calculate_angle(unit_target_vector):
@@ -93,7 +94,7 @@ def pathing(path, unit_size, origin=False, curr_angle=0):
     x, y = (0, 0)
 
     for coord in path:
-        print(coord)
+        logging.debug(coord)
         x_, y_ = coord
 
         # calculate the unit deviation from the previous point
@@ -117,7 +118,7 @@ def pathing(path, unit_size, origin=False, curr_angle=0):
 
         if abs(delta_angle) > 0:
             instructions.append(
-                (perform_spin, delta_angle)
+                (perform_spin, (delta_angle, target_angle))
             )  # rotate the car to match the target angle by rotating the remaining distance
 
         curr_angle = (
@@ -127,10 +128,10 @@ def pathing(path, unit_size, origin=False, curr_angle=0):
         drive_distance = math.sqrt(
             (vertical*unit_size)**2 + (horizontal*unit_size)**2
         )  # Pythagorean theorem
-        instructions.append((perform_drive, drive_distance))
+        instructions.append((perform_drive, (drive_distance,))) # NOTE: wrap drive_distance in tuple to be compatible when unpacking as with perform_spin (the trailing comma is important!)
 
-        print(get_move_string(vertical, horizontal))
-        print("delta angle:" + str(delta_angle) + " global angle:" + str(target_angle))
+        logging.debug(get_move_string(vertical, horizontal))
+        logging.debug("delta angle:" + str(delta_angle) + " global angle:" + str(target_angle))
 
         x, y = x_, y_
 
@@ -156,5 +157,67 @@ def follow(instructions, TB, mpu, max_power):
     """
 
     for action, arg in instructions:
-        action(arg, TB, mpu, max_power)
+        action(*arg, TB, mpu, max_power)
         time.sleep(0.5)
+
+
+if __name__ == "__main__":
+    # enable debug logging
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
+
+    from pathfinding.core.diagonal_movement import DiagonalMovement
+    from pathfinding.core.grid import Grid
+    from pathfinding.finder.a_star import AStarFinder
+
+    input_matrix = [
+        [1, 0, 0, 1],
+        [1, 0, 0, 1],
+        [1, 0, 1, 0],
+        [1, 0, 1, 1],
+        [1, 0, 0, 1],
+        [1, 1, 1, 1],
+    ]
+    start_node = (0, 0)
+    end_node = (3, 0)
+    
+    # define dummy functions
+    def perform_spin(delta, target, TB, mpu, max_power):
+        print(f"spin: {delta} deg")
+    
+    def perform_drive(meters, TB, mpu, max_power):
+        print(f"drive: {meters} m")
+
+    def a_star(matrix, start_node, end_node):
+        """A function that returns a path using the A* algorithm
+
+        Args:
+            matrix (list): a matrix representing the space the robot is in
+            start_node (tuple): the node the robot is starting from
+            end_node (tuple): the node the robot is trying to reach
+
+        Returns:
+            path (list) : a list of nodes representing the path the robot should take
+        """
+        grid = Grid(matrix=matrix)
+
+        start = grid.node(*start_node)
+        end = grid.node(*end_node)
+
+        finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
+        path, runs = finder.find_path(start, end, grid)
+
+        # pathing instruction
+        print(path)
+
+        # visualisation
+        print("operations:", runs, "path length:", len(path))
+        print(grid.grid_str(path=path, start=start, end=end))
+
+        return path
+    
+
+    path = a_star(input_matrix, start_node, end_node)
+
+    instructions = pathing(path, 1)
+
+    follow(instructions, None, None, 0)

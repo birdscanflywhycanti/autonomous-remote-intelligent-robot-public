@@ -10,27 +10,31 @@ import adafruit_mpu6050
 import board
 import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
+import logging
+
 
 # Function to spin an angle in degrees
-def perform_spin(degrees, TB, mpu, max_power):
+def perform_spin(delta, target, TB, mpu, max_power):
     """Spin an angle in degrees.
 
     Args:
-        degrees (float): angle to spin in degrees.
+        delta (float): angle to spin in degrees.
     """
 
+    power = max_power * 0.75
 
-    power = max_power*0.75
-
-    if degrees < 0.0:
+    if delta < 0.0:
         # Left turn
         drive_left = -1.0
         drive_right = +1.0
-        degrees *= -1
+        delta *= -1
     else:
         # Right turn
         drive_left = +1.0
         drive_right = -1.0
+
+    offset = (mpu.orientation + delta) - (target + delta)   # calculate offset from target+delta versus actual+delta
+    delta += offset # update delta with offset to align according to actual initial angle
 
     # Set the motors running
     TB.SetMotor1(drive_right * power)
@@ -45,16 +49,17 @@ def perform_spin(degrees, TB, mpu, max_power):
     total_rotation = 0
 
     while True:
-        x, y, z = mpu.gyro
-        x, y, z = math.degrees(x), math.degrees(y), math.degrees(z)
-        abs_z = abs(z)
-        sample = abs_z * sampling
+        abs_z = mpu.gyro_abs_z
+        sample = mpu.abs_z * sampling
 
         # print("Gyro X:%.2f, Y: %.2f, Z: %.2f rad/s" % (x, y, z))
-        print(
-            "Gyro: X:%.2f, Y: %.2f, Z: %.2f deg/s \t sample:%.2f \t total:%.2f"
-            % (x, y, z, sample, total_rotation)
-        )
+        if logging.isEnabledFor(logging.DEBUG):
+            x, y, z = mpu.gyro
+            x, y, z = math.degrees(x), math.degrees(y), math.degrees(z)
+            logging.debug(
+                "Gyro: X:%.2f, Y: %.2f, Z: %.2f deg/s \t sample:%.2f \t total:%.2f"
+                % (x, y, z, sample, total_rotation)
+            )
         # print(total_rotation)
 
         # NOTE: z-axis experimentally defined as 2d plane orientation
@@ -63,17 +68,17 @@ def perform_spin(degrees, TB, mpu, max_power):
         total_rotation += sample
 
         # if exceeded target exit
-        if total_rotation >= degrees:
+        if total_rotation >= delta:
             break  # exit once achieved target rotation
         # if predicted to exceed during sleep, sleep for predicted time to target, then exit
-        elif (total_rotation + sample) >= degrees:
+        elif (total_rotation + sample) >= delta:
             # total degrees left in rotation (degress-total_rotation) divided by abs(z)\
             # (positive rotational velocity) gives time to sleep (in seconds) before reaching target
-            sleep = (degrees - total_rotation) / abs_z
+            sleep = (delta - total_rotation) / abs_z
 
-            print(
+            logging.debug(
                 "Assuming constant rotation of Z:%.2f, sleeping for %.2f seconds to rotate %.2f degrees"
-                % (abs_z, sleep, (degrees - total_rotation))
+                % (abs_z, sleep, (delta - total_rotation))
             )
             time.sleep(sleep)
 
@@ -91,10 +96,13 @@ def perform_spin(degrees, TB, mpu, max_power):
     # Turn the motors off
     TB.MotorsOff()
 
-    print(f"total rotation: {total_rotation}")
+    logging.debug(f"total rotation: {total_rotation}")
 
 
 if __name__ == "__main__":
+    # enable debug logging
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
+
     # Setup the ThunderBorg
     TB = ThunderBorg.ThunderBorg()
     # TB.i2cAddress = 0x15                  # Uncomment and change the value if you have changed the board address

@@ -5,6 +5,7 @@ from pathfinding.core.diagonal_movement import DiagonalMovement
 from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
 
+import logging
 
 def a_star(matrix, start_node, end_node):
     """A function that returns a path using the A* algorithm
@@ -26,10 +27,10 @@ def a_star(matrix, start_node, end_node):
     path, runs = finder.find_path(start, end, grid)
 
     # pathing instruction
-    print(path)
+    logging.debug(path)
 
     # visualisation
-    print("operations:", runs, "path length:", len(path))
-    print(grid.grid_str(path=path, start=start, end=end))
+    logging.debug("operations:", runs, "path length:", len(path))
+    logging.debug(grid.grid_str(path=path, start=start, end=end))
 
     return path

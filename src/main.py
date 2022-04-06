@@ -9,6 +9,8 @@ from algorithms.algorithm import Algorithm
 from mpu6050 import MPU6050
 from robot.drive import follow, pathing
 
+import logging
+
 # from robot.accelerometer import perform_drive
 # from robot.gyroscope import perform_spin
 
@@ -23,15 +25,15 @@ TB.Init()
 if not TB.foundChip:
     boards = ThunderBorg.ScanForThunderBorg()
     if len(boards) == 0:
-        print("No ThunderBorg found, check you are attached :)")
+        logging.warning("No ThunderBorg found, check you are attached :)")
     else:
-        print("No ThunderBorg at address %02X, but we did find boards:" % (i2cAddress))
+        logging.warning("No ThunderBorg at address %02X, but we did find boards:" % (i2cAddress))
         for board in boards:
-            print("%02X (%d)" % (board, board))
-        print(
+            logging.info("%02X (%d)" % (board, board))
+        logging.info(
             "If you need to change the I2C address change the setup line so it is correct, e.g."
         )
-        print("TB.i2cAddress = 0x%02X" % (boards[0]))
+        logging.info("TB.i2cAddress = 0x%02X" % (boards[0]))
     sys.exit()
 
 TB.SetCommsFailsafe(False)  # Disable the communications failsafe
@@ -83,11 +85,14 @@ def main(TB, mpu):
     path = algorithm.use_a_star()
 
     instructions = pathing(path, 1)
-    print(instructions)
+    logging.debug(instructions)
 
     follow(instructions, TB, mpu, max_power)
 
 if __name__ == "__main__":
+    # enable debug logging
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
+
     try:
         main(TB, mpu)
     except:
@@ -100,5 +105,5 @@ if __name__ == "__main__":
         mpu.join()
 
         # exit program
-        print("Stopped")
+        logging.debug("Stopped")
         sys.exit()

@@ -4,6 +4,9 @@ from threading import Thread
 
 import adafruit_mpu6050
 import board
+import math
+
+import logging
 
 
 class MPU6050(Thread):
@@ -19,19 +22,39 @@ class MPU6050(Thread):
 
         self.poll = 0.05  # poll every <self.poll> seconds
 
+        self.gyro_abs_z = 0     # preprocessing to save duplicate instructions
+        self.orientation = 0
+
     def run(self):
+        """ Update loop to poll MPU sensor for gyro and accelerometer data.
+        
+        """
+        
         while True:
             self.gyro = self.mpu.gyro
             self.acceleration = self.mpu.acceleration
 
+            self.gyroscopic()
+
             time.sleep(self.poll)
 
+    def gyroscopic(self):
+        """ Update internal orientation, for calculating future rotations.
+        
+        """
+        
+        x, y, z = mpu.gyro
+        self.gyro_abs_z = abs(math.degrees(z))
+        self.orientation += self.gyro_abs_z * self.poll
 
 if __name__ == "__main__":
+    # enable debug logging
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
+
     # initialise mpu6050 board
     mpu = MPU6050()
     mpu.setName("MPU6050")
     mpu.start()
 
     while True:
-        print(f"accelerometer: {mpu.acceleration}\ngyro: {mpu.gyro}")
+        logging.debug(f"accelerometer: {mpu.acceleration}\ngyro: {mpu.gyro}")
