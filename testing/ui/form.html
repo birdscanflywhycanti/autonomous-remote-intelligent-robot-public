@@ -42,6 +42,14 @@
     </ul>
 
     <pre></pre>
+    
+    <p>
+        <span id="alertSetDest">Coords: </span><span id="coords">1, 1</span>
+    </p>
+    
+    <p>
+        <span>Dest: </span><span id="dest"></span>
+    </p>
 
     <script src='https://cdn.jsdelivr.net/gh/jcubic/ascii-canvas/dist/umd.min.js'></script>
     <script src='https://unpkg.com/figlet/lib/figlet.js'></script>
@@ -156,6 +164,7 @@
         }
         window.addEventListener('keydown', function (e) {
             const { x, y } = box;
+            
             switch (e.key) {
                 case 'ArrowLeft':
                     if (x > 1) {
@@ -168,7 +177,7 @@
                     }
                     break;
                 case 'ArrowUp':
-                    if (y > 0) {
+                    if (y-height > 0) {
                         box.move({ y: y - 1 });
                     }
                     break;
@@ -177,7 +186,17 @@
                         box.move({ y: y + 1 });
                     }
                     break;
+                case 'Enter':
+                    document.getElementById('alertSetDest').innerText = 'Set dest to: ';
+                    document.getElementById('dest').innerText = box.x + ", " + box.y;
+                    setTimeout(() => {
+                        document.getElementById('alertSetDest').innerText = 'Coords: ';
+                    }, 1000);
+                    break
             }
+
+            document.getElementById('coords').innerText = box.x + ", " + box.y;
+            
             render();
         });
 
