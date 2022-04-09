@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Controller</title>
+</head>
+<body>
+    <ul>
+        <li>This UI imitates a logic programming language such as Prolog.</li>
+        <li>The map element can be manipulated to update the robot's knowledge of it's environment.</li>
+        <li>The robot is controlled using natural language commands, formed from the dropdown constructor.</li>
+    </ul>
+
+    <div>
+        <form id="actionForm" action="/action" method="POST">
+            <select id="select1" name="act" onchange="updateGrammar()">
+                <option>Test</option>
+                <option>Move</option>
+            </select>
+            <label for="select1" id="connective">if</label> <!-- "if" / "to" -->
+            <select id="select2" name="landmark">
+                <option>Landmark 1</option>
+                <option>Landmark 2</option>
+            </select>
+            <label for="select2" id="adjective">is open?</label> <!-- "is open?" / "." -->
+            <br><br>
+            <input type="submit" value="Send">
+        </form>
+    </div>
+
+    <script>
+        function updateGrammar() {
+            selectElement = document.getElementById('select1');
+            selected = selectElement.value;
+            
+            connective = document.getElementById('connective');
+            adjective = document.getElementById('adjective');
+
+            if (selected == "1") {
+                connective.innerText = "if";
+                adjective.innerText = "is open?";
+            }
+            else if (selected == "2") {
+                connective.innerText = "to";
+                adjective.innerText = ".";
+            }
+        }
+    </script>
+</body>
+</html>
