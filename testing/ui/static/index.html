@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+
+    <title>UI Controller</title>
+</head>
+
+<ul>
+    <li>This UI imitates a logic programming language such as Prolog.</li>
+    <li>The map element can be manipulated to update the robot's knowledge of it's environment.</li>
+    <li>The robot is controlled using natural language commands, formed from the dropdown constructor.</li>
+</ul>
+
+<div>
+    <form id="actionForm" action="/action" method="POST">
+        <select id="select1" name="act" onchange="updateGrammar()">
+            <option>Test</option>
+            <option>Move</option>
+        </select>
+        <label for="select1" id="connective">if</label> <!-- "if" / "to" -->
+        <select id="select2" name="landmark">
+            <option>Landmark 1</option>
+            <option>Landmark 2</option>
+        </select>
+        <label for="select2" id="adjective">is open?</label> <!-- "is open?" / "." -->
+        <br><br>
+        <input type="submit" value="Send">
+    </form>
+</div>
+
+<hr>
+
+<ul>
+    <li>We can render the ASCII maze used by the A* algorithm (and future, D* Lite) on a JS canvas.</li>
+    <li>This could be updated as the robot navigates the environment, to provide feedback.</li>
+    <li>The map can also be navigated user arrow keys, to manually set destinations for the robot?</li>
+</ul>
+
+<pre id="myCanvas"></pre>
+
+<ul>
+    <li>(?) Use Arrow keys to move. Enter to set dest. Q and E to set rotation.</li>
+</ul>
+
+<p>
+    <span id="destDecorator">Coords: </span><span id="coords">1, 1</span>
+</p>
+
+<p>
+    <span id="angleDecorator">Angle: </span><span id="angle">0</span><span>°</span>
+</p>
+
+<hr>
+
+<p>
+    <span>Dest: </span><span id="dest"></span>
+</p>
+<p>
+    <span>Angle: </span><span id="destAngle">0</span><span>°</span>
+</p>
+
+
+<script src='https://cdn.jsdelivr.net/gh/jcubic/ascii-canvas/dist/umd.min.js'></script>
+<script src='https://unpkg.com/figlet/lib/figlet.js'></script>
+<script src='https://unpkg.com/js-polyfills/keyboard.js'></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+    integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+    crossorigin="anonymous"></script>
+<script type="text/javascript" charset="utf-8">
+    var socket = io();
+
+    socket.on('connection', (socket) => {
+        socket.on('update', (data) => {
+            console.log('json: ' + data);
+        });
+    });
+</script>
+
+<script>
+    function updateGrammar() {
+        selectElement = document.getElementById('select1');
+        selected = selectElement.value;
+
+        connective = document.getElementById('connective');
+        adjective = document.getElementById('adjective');
+
+        if (selected == "1") {
+            connective.innerText = "if";
+            adjective.innerText = "is open?";
+        }
+        else if (selected == "2") {
+            connective.innerText = "to";
+            adjective.innerText = ".";
+        }
+    }
+</script>
+<script>
+    const { Canvas, Item } = canvas;
+
+    var text, height, width, box, angle, cursor;
+
+    const ROWS = 18;
+    const COLS = 80;
+    const myCanvas = new Canvas(COLS, ROWS);
+
+    const rect = new Item(frame());
+    myCanvas.append(rect);
+
+    const world = new Item(
+        `+----+
+|s#  |
+|x# #|
+|x#e |
+|x##x|
+| xx |
++----+`,
+        { x: 4, y: 4 }
+    );
+    myCanvas.append(world);
+
+    function rep(str, count) {
+        return new Array(count).fill(str).join('');
+    }
+
+    function frame() {
+        const output = [];
+        const x_count = COLS - 2;
+        const y_Count = ROWS - 2;
+        output.push(`+${rep('-', x_count)}+`);
+        for (let i = 0; i < y_Count; ++i) {
+            output.push(`|${rep(' ', x_count)}|`);
+        }
+        output.push(`+${rep('-', x_count)}+`);
+        return output.join('\n');
+    }
+
+    function rotation_ascii(angle) {
+        const ascii = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
+
+        // compute compass direction (N, NE, E, SE, S, SW, W, NW) closest to current angle.
+        let index = Math.round(((angle %= 360) < 0 ? angle + 360 : angle) / 45) % 8;
+
+        // return relevant ascii arrow
+        return ascii[index];
+    }
+
+    function init() {
+        height = 1;
+        width = 1;
+        angle = 0
+        cursor = rotation_ascii(angle)
+
+        box = new Item(cursor, { x: 1, y: 1 });
+
+        myCanvas.append(box);
+
+        render();
+    }
+
+    // browser code
+    var pre = document.getElementById('myCanvas');
+    function render() {
+        pre.innerHTML = myCanvas.toString();
+    }
+    window.addEventListener('keydown', function (e) {
+        const { x, y } = box;
+
+        switch (e.key) {
+            case 'ArrowLeft':
+                if (x > 1) {
+                    box.move({ x: x - 1 });
+                }
+                break;
+            case 'ArrowRight':
+                if (x + width < COLS - 1) {
+                    box.move({ x: x + 1 });
+                }
+                break;
+            case 'ArrowUp':
+                if (y - height > 0) {
+                    box.move({ y: y - 1 });
+                }
+                break;
+            case 'ArrowDown':
+                if (y + height < ROWS - 1) {
+                    box.move({ y: y + 1 });
+                }
+                break;
+            case 'Enter':
+                document.getElementById('destDecorator').innerText = 'Set dest to: ';
+                document.getElementById('dest').innerText = box.x + ", " + box.y;
+                document.getElementById('angleDecorator').innerText = 'Set angle to: ';
+                document.getElementById('destAngle').innerText = angle;
+
+                // send to socket
+                socket.emit('json', JSON.stringify({
+                    'dest': [box.x, box.y],
+                    'angle': angle
+                }))
+
+                setTimeout(() => {
+                    document.getElementById('destDecorator').innerText = 'Coords: ';
+                    document.getElementById('angleDecorator').innerText = 'Angle: ';
+                }, 1000);
+                break;
+            case 'q':
+                angle -= 5;
+                if (angle < 0) {
+                    angle += 360; // wrap around
+                }
+                document.getElementById('angle').innerText = angle;
+                cursor = rotation_ascii(angle);
+                box.update(cursor);
+                break;
+            case 'e':
+                angle += 5;
+                if (angle >= 360) {
+                    angle -= 360; // wrap around
+                }
+                document.getElementById('angle').innerText = angle;
+                cursor = rotation_ascii(angle);
+                box.update(cursor);
+                break;
+        }
+
+        document.getElementById('coords').innerText = box.x + ", " + box.y;
+
+        render();
+    });
+</script>
+<script>
+    init()
+</script>
+
+
+</body>
+
+</html>
