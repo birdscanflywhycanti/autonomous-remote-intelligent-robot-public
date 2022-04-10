@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "express": "^4.17.3",
+    "socket.io": "^4.4.1"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "name": "ui",
+  "description": "### Client - HTML requests to Flask server to load webpage.     - Recieve static files. - Websocket connection between client and server.     - Send new commands.     - Recieve environment map data.     - Recieve updates on robot position.",
+  "version": "1.0.0",
+  "main": "server.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
