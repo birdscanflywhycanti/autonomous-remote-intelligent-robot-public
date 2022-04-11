@@ -69,7 +69,7 @@ def main(TB, mpu):
     VOLTAGE_IN = 9.6  # Total battery voltage to the ThunderBorg
 
     # NOTE: limiter has lower bound to power motors, ~0.4 experimental lower bound
-    LIMITER = 0.6  # utilise only <limiter>% of power, to slow down actions
+    LIMITER = 0.85  # utilise only <limiter>% of power, to slow down actions
 
     VOLTAGE_OUT = (
         12.0 * LIMITER
@@ -91,7 +91,7 @@ def main(TB, mpu):
 
 if __name__ == "__main__":
     # enable debug logging
-    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
 
     try:
         main(TB, mpu)

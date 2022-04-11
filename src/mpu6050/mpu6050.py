@@ -42,8 +42,10 @@ class MPU6050(Thread):
         """ Update internal orientation, for calculating future rotations.
         
         """
+
+        logging.debug(f"orientation: {self.orientation}")
         
-        x, y, z = mpu.gyro
+        x, y, z = self.mpu.gyro
         self.gyro_abs_z = abs(math.degrees(z))
         self.orientation += self.gyro_abs_z * self.poll
 
