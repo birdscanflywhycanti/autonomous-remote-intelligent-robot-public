@@ -69,22 +69,22 @@ window.addEventListener('keydown', function (e) {
     const { x, y } = box;
 
     switch (e.key) {
-        case 'ArrowLeft':
+        case 'a':
             if (x > 1) {
                 box.move({ x: x - 1 });
             }
             break;
-        case 'ArrowRight':
+        case 'd':
             if (x + width < COLS - 1) {
                 box.move({ x: x + 1 });
             }
             break;
-        case 'ArrowUp':
+        case 'w':
             if (y - height > 0) {
                 box.move({ y: y - 1 });
             }
             break;
-        case 'ArrowDown':
+        case 's':
             if (y + height < ROWS - 1) {
                 box.move({ y: y + 1 });
             }
