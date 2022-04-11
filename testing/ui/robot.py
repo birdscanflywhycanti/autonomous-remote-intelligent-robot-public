@@ -13,25 +13,28 @@ async def catch_all(event, data):
 
 @sio.event
 async def disconnect():
-    print('disconnected from server')
+    logging.warning('disconnected from server')
 
-async def connect(url):
-    await sio.connect(url)
+@sio.event
+async def send_json(data):
+    await sio.emit('json', json.dumps())
+
+async def listen():
     await sio.wait()
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+async def main(url):
+    await sio.connect(url)
 
-    url = sys.argv[1]
+    coroutines = [listen(), test()]
+    res = await asyncio.gather(*coroutines, return_exceptions=True)
 
-    asyncio.run(connect(url))
+    return res
 
-    """
+async def test():
     ### RUN A* TEST ###
     from pathfinding.core.diagonal_movement import DiagonalMovement
     from pathfinding.core.grid import Grid
     from pathfinding.finder.a_star import AStarFinder
-    import time
 
     matrix = [[1, 0, 1, 1], [1, 0, 1, 0], [1, 0, 1, 1], [1, 0, 0, 1], [1, 1, 1, 1]]
     grid = Grid(matrix=matrix)
@@ -47,5 +50,17 @@ if __name__ == "__main__":
     # iterate actions (intervening path coords to destination)
     # send a websocket message to server for each action
     for action in path:
-        await sio.emit('my message', {'foo': 'bar'})
-    """
+        await sio.emit('json', json.dumps({'action':action}))
+        logging.info(f"sent: {action}")
+        await asyncio.sleep(1)
+
+    return
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
+    url = sys.argv[1]
+
+    res1, res2 = asyncio.get_event_loop().run_until_complete(main(url))
+
+    

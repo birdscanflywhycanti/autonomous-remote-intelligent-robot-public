@@ -14,7 +14,6 @@ app.get('/', (req, res) => {
 
 app.use(express.static('public'))
 
-
 io.on('connection', (socket) => {
   console.log('a user connected');
   socket.on('disconnect', () => {
