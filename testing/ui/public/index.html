@@ -75,12 +75,8 @@
 <script type="text/javascript" charset="utf-8">
     var socket = io();
 
-    socket.on('connection', function(socket) {
-        console.log("Connected");
-
-        socket.on('mirror', function(data) {
-            console.log('json: ' + data);
-        });
+    socket.on('mirror', function (data) {
+        console.log('server said: ' + data);
     });
 
     function updateGrammar() {
