@@ -3,6 +3,9 @@
 sudo shutdown -P now
 ```
 
+## Router website
+`192.168.11.1`
+
 ## ssh command usage:
 *On COMP5010 router*
 ```bash
@@ -22,7 +25,11 @@ scp filename.py pi@192.168.11.11:folder/filename.py
 
 *Copy folder (and sub-files / folders)*
 ```bash
-scp -r folder pi@192.168.11.11:folder
+scp -r src pi@192.168.11.11:arir
+```
+
+```bash
+scp -r testing pi@192.168.11.11:testing
 ```
 
 ## Pip dependencies

@@ -1,34 +1,32 @@
 import asyncio
 import logging
-import websockets
 import json
+import socketio
+import sys
 
-async def consumer_handler(websocket):
-    async for message in websocket:
-        logging.info(f"Message: {message}")
+# asyncio
+sio = socketio.AsyncClient()
 
+@sio.on('*')
+async def catch_all(event, data):
+    logging.info(data)
 
-async def consume(hostname, port):
-    websocket_resource_url = f"ws:{hostname}:{port}"
-    async with websockets.connect(websocket_resource_url) as websocket:
-        await consumer_handler(websocket)
+@sio.event
+async def disconnect():
+    print('disconnected from server')
 
-
-async def produce(message, hostname, port):
-    websocket_resource_url = f"ws:{hostname}:{port}"
-    async with websockets.connect(websocket_resource_url) as websocket:
-        await websocket.send(message)
-        await websocket.recv()
-
+async def connect(url):
+    await sio.connect(url)
+    await sio.wait()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    # open listener thread
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(consume(hostname="localhost", port=5000))
-    loop.run_forever()
+    url = sys.argv[1]
 
+    asyncio.run(connect(url))
+
+    """
     ### RUN A* TEST ###
     from pathfinding.core.diagonal_movement import DiagonalMovement
     from pathfinding.core.grid import Grid
@@ -49,4 +47,5 @@ if __name__ == "__main__":
     # iterate actions (intervening path coords to destination)
     # send a websocket message to server for each action
     for action in path:
-        asyncio.run(produce(message=json.dumps({"action":action}), host='localhost', port=4000))
+        await sio.emit('my message', {'foo': 'bar'})
+    """
