@@ -66,7 +66,6 @@
 </p>
 
 
-<script src="js/jquery/jquery.min.js"></script>
 <script src='js/ascii-canvas/umd.min.js'></script>
 <script src='js/js-polyfills/keyboard.js'></script>
 <script src="js/socket.io/socket.io.js"></script>
@@ -77,6 +76,10 @@
 
     socket.on('mirror', function (data) {
         console.log('server said: ' + data);
+    });
+
+    socket.on('disconnect', function (data) {
+        console.log('server disconnected');
     });
 
     function updateGrammar() {
