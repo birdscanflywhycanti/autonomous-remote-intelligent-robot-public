@@ -64,12 +64,9 @@ def get_move_string(y, x):
         1: "right",
         -1: "left",
     }
-    out = "move "
-    fragment1 = vertical.get(y, "")
-    fragment2 = horizontal.get(x, "")
-    out = out + fragment1
-    out = out + " "
-    out = out + fragment2
+    
+    out = f"move {vertical.get(y, '')} {horizontal.get(x, '')}"
+    
     return out
 
 
@@ -128,7 +125,7 @@ def pathing(path, unit_size, origin=False, curr_angle=0, final_angle=0):
         drive_distance = math.sqrt(
             (vertical*unit_size)**2 + (horizontal*unit_size)**2
         )  # Pythagorean theorem
-        instructions.append((perform_drive, (drive_distance,))) # NOTE: wrap drive_distance in tuple to be compatible when unpacking as with perform_spin (the trailing comma is important!)
+        instructions.append(((x_, y_), (perform_drive, (drive_distance,)))) # NOTE: wrap drive_distance in tuple to be compatible when unpacking as with perform_spin (the trailing comma is important!)
 
         logging.debug(get_move_string(vertical, horizontal))
         logging.debug("delta angle:" + str(delta_angle) + " global angle:" + str(target_angle))

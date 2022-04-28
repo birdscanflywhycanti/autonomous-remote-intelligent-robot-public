@@ -9,20 +9,9 @@ const myCanvas = new Canvas(COLS, ROWS);
 const rect = new Item(frame());
 myCanvas.append(rect);
 
-var world = new Item(
-    `+----+
-| #  |
-| # #|
-| #  |
-| ## |
-|    |
-+----+`,
-    { x: 0, y: 0 }
-);
+var world = new Item('', { x: 0, y: 0 });
 
-var robot = new Item(
-    '🤖', {x: 0, y: 0}
-);
+var robot = new Item('🤖', {x: 0, y: 0});
 
 myCanvas.append(world);
 
@@ -58,7 +47,7 @@ function init() {
     angle = 0
     cursor = rotation_ascii(angle)
 
-    box = new Item(cursor, { x: 1, y: 1 });
+    box = new Item(cursor, { x: 0, y: 0 });
 
     myCanvas.append(box);
 

@@ -91,6 +91,13 @@
         console.log('server disconnected');
     });
 
+    document.addEventListener('DOMContentLoaded', (e) => {
+        console.log('Requesting map from robot');
+        socket.emit('json', JSON.stringify({
+            'idKey': 'mapRequest',
+        }))
+    });
+
     function updateGrammar() {
         selectElement = document.getElementById('select1');
         selected = selectElement.value;
