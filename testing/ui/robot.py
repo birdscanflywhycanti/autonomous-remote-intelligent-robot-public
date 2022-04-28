@@ -11,6 +11,8 @@ import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
 from robot import perform_spin, perform_drive, pathing
 
+import queue
+
 # asyncio
 sio = socketio.AsyncClient()
 
@@ -21,6 +23,11 @@ async def catch_all(event, data):
 
     destination = json_data['dest']
     angle = json_data['angle']
+
+    # calculate movement to new position
+
+    # add instructions to movement queue
+    instruction_queue.put((action, arg))
 
 @sio.event
 async def disconnect():
@@ -36,19 +43,14 @@ async def listen():
 async def main(url):
     await sio.connect(url)
 
-    coroutines = [listen(), test()]
+    coroutines = [listen(), follow()]
     res = await asyncio.gather(*coroutines, return_exceptions=True)
 
     return res
 
-async def test():
-    ### RUN A* TEST ###
-    from pathfinding.core.diagonal_movement import DiagonalMovement
-    from pathfinding.core.grid import Grid
-    from pathfinding.finder.a_star import AStarFinder
+async def follow(instructions, TB, mpu, max_power):
 
-    logging.debug("0")
-
+    # initialise some objects for movement
     # initialise gyroscope board
     i2c = board.I2C()  # uses board.SCL and board.SDA
     mpu = adafruit_mpu6050.MPU6050(i2c)
@@ -95,65 +97,24 @@ async def test():
     else:
         max_power = VOLTAGE_OUT / float(VOLTAGE_IN)
 
-    logging.debug("1")
+    # repeat forever
+    while 1:
+        if not instruction_queue.empty():
+            action, arg = instruction_queue.get()    # poll queue for instruction
+        else:
+            await asyncio.sleep(1)
 
-    logging.debug("2")
-
-    matrix = [[1, 0, 1, 1], [1, 0, 1, 0], [1, 0, 1, 1], [1, 0, 0, 1], [1, 1, 1, 1]]
-    grid = Grid(matrix=matrix)
-
-    start = grid.node(0, 0)
-    end = grid.node(2, 2)
-
-    finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
-    path, runs = finder.find_path(start, end, grid)
-
-    logging.debug("3")
-
-    instructions = instruction_list(pathing(path, 1, final_angle=180))
-
-    logging.info(f"Running path: {path}")
-
-    await follow(instructions, None, None, 0)
-
-    logging.debug("4")
-
-
-async def follow(instructions, TB, mpu, max_power):
-
-    logging.debug("3.1")
-
-    while instructions.size > 0:
-        action, arg = instructions.pop()
-
-        await sio.emit('json', json.dumps({'action':action}))
-
-        logging.debug("3.2")
-
-        action(*arg, TB, mpu, max_power)
-
-        logging.debug("3.3")
+        action(*arg, TB, mpu, max_power)    # execute instruction
         
+        await sio.emit('json', json.dumps({'action':action}))   # emit new location to server
+
+        instruction_queue.task_done()
         logging.info(f"sent: {action}")
-
-        await asyncio.sleep(1)
-
-
-class instruction_list:
-    def __init__(self, instructions):
-        self.instructions = []
-        self.size = 0
-
-    def pop(self):
-        x = self.instructions.pop(0)
-        self.size = len(self.instructions)
-        return x
-
-    def set(self, instructions):
-        self.instructions = instructions
-        self.size = len(self.instructions)
+        
 
 if __name__ == "__main__":
+    instruction_queue = queue.Queue()
+
     logging.basicConfig(level=logging.DEBUG)
 
     url = sys.argv[1]
