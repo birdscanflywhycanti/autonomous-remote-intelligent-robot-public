@@ -9,16 +9,21 @@ const myCanvas = new Canvas(COLS, ROWS);
 const rect = new Item(frame());
 myCanvas.append(rect);
 
-const world = new Item(
+var world = new Item(
     `+----+
-|s#  |
-|x# #|
-|x#e |
-|x##x|
-| xx |
+| #  |
+| # #|
+| #  |
+| ## |
+|    |
 +----+`,
-    { x: 4, y: 4 }
+    { x: 0, y: 0 }
 );
+
+var robot = new Item(
+    '🤖', {x: 0, y: 0}
+);
+
 myCanvas.append(world);
 
 function rep(str, count) {
@@ -97,6 +102,7 @@ window.addEventListener('keydown', function (e) {
 
             // send to socket
             socket.emit('json', JSON.stringify({
+                'idKey': 'destUpdate',
                 'dest': [box.x, box.y],
                 'angle': angle
             }))

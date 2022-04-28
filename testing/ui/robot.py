@@ -10,6 +10,7 @@ import board
 import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
 from robot import perform_spin, perform_drive, pathing
+from algorithms.algorithm import Algorithm
 
 import queue
 
@@ -21,13 +22,17 @@ async def catch_all(event, data):
     logging.info(data)
     json_data = json.loads(data)
 
-    destination = json_data['dest']
-    angle = json_data['angle']
+    if json_data['idKey'] == 'destUpdate':
+        destination = json_data['dest']
+        angle = json_data['angle']
 
-    # calculate movement to new position
+        # calculate movement to new position
+        alg = Algorithm(matrix, curr_position, dest)
+        instructions = alg.use_a_star()
 
-    # add instructions to movement queue
-    instruction_queue.put((action, arg))
+        # add instructions to movement queue
+        for action, arg in instructions:
+            instruction_queue.put((action, arg))
 
 @sio.event
 async def disconnect():
@@ -48,7 +53,7 @@ async def main(url):
 
     return res
 
-async def follow(instructions, TB, mpu, max_power):
+async def follow():
 
     # initialise some objects for movement
     # initialise gyroscope board
@@ -106,13 +111,12 @@ async def follow(instructions, TB, mpu, max_power):
 
         action(*arg, TB, mpu, max_power)    # execute instruction
         
-        await sio.emit('json', json.dumps({'action':action}))   # emit new location to server
-
+        await sio.emit('json', json.dumps({'idKey': 'robotUpdate', 'x': curr_position[0], 'y': curr_position[1]}))   # emit new location to server
         instruction_queue.task_done()
-        logging.info(f"sent: {action}")
-        
 
 if __name__ == "__main__":
+    curr_position = (0, 0)
+    matrix = [[1, 0, 1, 1], [1, 0, 1, 0], [1, 0, 1, 1], [1, 0, 0, 1], [1, 1, 1, 1]]
     instruction_queue = queue.Queue()
 
     logging.basicConfig(level=logging.DEBUG)

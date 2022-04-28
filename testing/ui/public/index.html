@@ -76,6 +76,15 @@
 
     socket.on('mirror', function (data) {
         console.log('server said: ' + data);
+        let jsonArray = JSON.parse(data);
+        console.log(jsonArray);
+
+        if (jsonArray.idKey == 'mapUpdate') {
+            world.update(jsonArray.updatedMap);
+        }
+        else if (jsonArray.idKey == 'robotUpdate') {
+            robot.move({x: jsonArray.x, y: jsonArray.y})
+        }
     });
 
     socket.on('disconnect', function (data) {
