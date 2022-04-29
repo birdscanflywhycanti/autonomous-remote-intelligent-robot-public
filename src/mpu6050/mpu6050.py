@@ -47,7 +47,13 @@ class MPU6050(Thread):
         
         x, y, z = self.mpu.gyro
         self.gyro_abs_z = abs(math.degrees(z))
+        
         self.orientation += self.gyro_abs_z * self.poll
+
+        if self.orientation >= 360:
+            self.orientation = 0
+        elif self.orientation < 0:
+            self.orientation += 355
 
 if __name__ == "__main__":
     # enable debug logging
