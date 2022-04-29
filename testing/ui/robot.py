@@ -19,7 +19,7 @@ from pathfinding.core.grid import Grid
 
 from robot.accelerometer import perform_drive
 from robot.gyroscope import perform_spin
-from robot.drive import pathing, get_move_string, calculate_angle
+from robot.drive import follow, pathing, get_move_string, calculate_angle
 
 from mpu6050 import MPU6050
 
@@ -171,44 +171,25 @@ class Follow(threading.Thread):
                 print("sleep")
                 time.sleep(0.5)
 
-class Halt(threading.Thread):
-    def __init__(self):
-        super(Halt, self).__init__()
-        self.terminated = False
-        self.start()
- 
-    def run(self):
-        print('Waiting to halt..')
-        try:
-            while not self.terminated:
-                events = pygame.event.get()
-                for event in events:
-                    if event.type == pygame.QUIT:
-                        break
 
-                time.sleep(0.5)
-        except KeyboardInterrupt:
-            pass
+if __name__ == "__main__":
+    try:
+        logging.basicConfig(level=logging.DEBUG)
 
-        # finally stop motors
+        followthread = Follow()
+
+        url = sys.argv[1]
+
+        res1, res2 = asyncio.get_event_loop().run_until_complete(main(url))
+    except:
         TB.SetCommsFailsafe(False)
         TB.SetLeds(0,0,0)
         TB.MotorsOff()
 
         # end sensor thread
         mpu.join()
+        followthread.join()
 
         # exit program
         logging.debug("Stopped")
         sys.exit()
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-
-    followthread = Follow()
-    haltthread = Halt()
-
-    url = sys.argv[1]
-
-    res1, res2 = asyncio.get_event_loop().run_until_complete(main(url))
