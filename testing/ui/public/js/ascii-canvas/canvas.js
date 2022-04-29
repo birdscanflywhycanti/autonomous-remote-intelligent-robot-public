@@ -1,6 +1,6 @@
 const { Canvas, Item } = canvas;
 
-var text, height, width, box, angle, cursor;
+var text, height, width, box, angle, cursor, world, robot;
 
 const ROWS = 18;
 const COLS = 80;
@@ -9,11 +9,7 @@ const myCanvas = new Canvas(COLS, ROWS);
 const rect = new Item(frame());
 myCanvas.append(rect);
 
-var world = new Item('', { x: 0, y: 0 });
 
-var robot = new Item('🤖', {x: 0, y: 0});
-
-myCanvas.append(world);
 
 function rep(str, count) {
     return new Array(count).fill(str).join('');
@@ -47,11 +43,24 @@ function init() {
     angle = 0
     cursor = rotation_ascii(angle)
 
+    world = new Item('', { x: 0, y: 0 });
+
+    robot = new Item('X', {x: 0, y: 0});
+
+    myCanvas.append(world);
+
+    myCanvas.append(robot);
+
     box = new Item(cursor, { x: 0, y: 0 });
 
     myCanvas.append(box);
 
     render();
+
+    console.log('Requesting map from robot');
+    socket.emit('json', JSON.stringify({
+        'idKey': 'mapRequest',
+    }));
 }
 
 // browser code

@@ -9,6 +9,7 @@ import adafruit_mpu6050
 import board
 import socketio
 
+import pygame
 import threading
 
 import ThunderBorg3 as ThunderBorg  # conversion for python 3
@@ -20,10 +21,9 @@ from robot.accelerometer import perform_drive
 from robot.gyroscope import perform_spin
 from robot.drive import pathing, get_move_string, calculate_angle
 
-# initialise some objects for movement
-# initialise gyroscope board
-i2c = board.I2C()  # uses board.SCL and board.SDA
-mpu = adafruit_mpu6050.MPU6050(i2c)
+from mpu6050 import MPU6050
+
+
 
 # Setup the ThunderBorg
 TB = ThunderBorg.ThunderBorg()
@@ -48,6 +48,10 @@ if not TB.foundChip:
         print("TB.i2cAddress = 0x%02X" % (boards[0]))
     sys.exit()
 TB.SetCommsFailsafe(False)  # Disable the communications failsafe
+
+mpu = MPU6050()
+mpu.setName("MPU6050")
+mpu.start()
 
 # Power settings
 VOLTAGE_IN = 9.6  # Total battery voltage to the ThunderBorg
@@ -95,14 +99,14 @@ async def catch_all(event, data):
             instruction_queue.get()
             instruction_queue.task_done()
 
-        for instruction in instructions:
-            instruction_queue.put(instruction)
+        for path, instruction in list(zip(path, instructions)):
+            instruction_queue.put((path, instruction))
 
         print(instruction_queue.qsize())
 
     elif "idKey" in json_data and json_data["idKey"] == "mapRequest":
         grid = Grid(matrix=matrix)
-        emitQueue.put(json.dumps({'idKey': 'mapUpdate', 'map': grid.grid_str(path=path)}))
+        emitQueue.put(json.dumps({'idKey': 'mapUpdate', 'map': grid.grid_str()}))
 
 
 @sio.event
@@ -167,9 +171,43 @@ class Follow(threading.Thread):
                 print("sleep")
                 time.sleep(0.5)
 
+class Halt(threading.Thread):
+    def __init__(self):
+        super(Halt, self).__init__()
+        self.terminated = False
+        self.start()
+ 
+    def run(self):
+        print('Waiting to halt..')
+        try:
+            while not self.terminated:
+                events = pygame.event.get()
+                for event in events:
+                    if event.type == pygame.QUIT:
+                        break
+
+                time.sleep(0.5)
+        except KeyboardInterrupt:
+            pass
+
+        # finally stop motors
+        TB.SetCommsFailsafe(False)
+        TB.SetLeds(0,0,0)
+        TB.MotorsOff()
+
+        # end sensor thread
+        mpu.join()
+
+        # exit program
+        logging.debug("Stopped")
+        sys.exit()
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
+
+    followthread = Follow()
+    haltthread = Halt()
 
     url = sys.argv[1]
 
