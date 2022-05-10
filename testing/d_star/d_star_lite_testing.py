@@ -285,11 +285,11 @@ class D_Star_Lite:
 
 
 maze = [
-    [0, 0, 0, -2, 0, -2],
-    [0, 0, 0, -2, 0, -2],
-    [0, 0, 0, -2, 0, -2],
-    [0, 0, 0, -2, 0, -2],
-    [0, 0, 0, -2, 0, -2],
+    [0, 0, 0, -1, 0, -1],
+    [0, 0, 0, -1, 0, -1],
+    [0, 0, 0, -1, 0, -1],
+    [0, 0, 0, -1, 0, -1],
+    [0, 0, 0, -1, 0, -1],
     [0, 0, 0, 0, 0, 0],
 ]
 
@@ -324,9 +324,10 @@ s_new = None
 while s_new != "goal":
     s_new, k_m = d_star_lite.moveAndRescan(graph, queue, s_current, 1, k_m)
     s_current = s_new
-#"""
-
+    print(s_new)
 # """
+
+#"""
 s_new, k_m = d_star_lite.moveAndRescan(graph, queue, s_current, 1, k_m)
 print(s_new)
 s_current = s_new
@@ -353,4 +354,11 @@ print(s_new)
 s_new, k_m = d_star_lite.moveAndRescan(graph, queue, s_current, 1, k_m)
 s_current = s_new
 print(s_new)
+s_new, k_m = d_star_lite.moveAndRescan(graph, queue, s_current, 1, k_m)
+s_current = s_new
+print(s_new)
+s_new, k_m = d_star_lite.moveAndRescan(graph, queue, s_current, 1, k_m)
+s_current = s_new
+print(s_new)
+
 # """
