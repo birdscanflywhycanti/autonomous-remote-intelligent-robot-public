@@ -12,6 +12,7 @@ Adafruit-PlatformDetect==3.22.0
 Adafruit-PureIO==1.1.9
 board==1.0
 machine==0.0.1
+adafruit-circuitpython-lis3dh
 micropython-cpython-utime==0.4
 pathfinding==1.0.1
 pycrypto==2.6.1

@@ -33,19 +33,19 @@ scp -r testing pi@192.168.11.11:testing
 ```
 
 ## Pip dependencies
-1. *On system with internet*
+1. *On laptop, connected to internet*
 ```bash
 mkdir dependencies
 pip download -r requirements.txt -d "./dependencies"
 tar cvfz dependencies.tar.gz dependencies
 ```
 
-2. Copy `dependencies` tar using scp.
+2. *On same wifi as robot* Copy `dependencies` tar using scp.
 ```bash
 scp dependencies.tar.gz pi@192.168.11.11:dependencies.tar.gz
 ```
 
-3. *On system without internet*
+3. *On robot*
 ```bash
 tar zxvf dependencies.tar.gz
 cd dependencies
