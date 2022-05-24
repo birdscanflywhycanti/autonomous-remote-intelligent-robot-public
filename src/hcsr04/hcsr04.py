@@ -1,105 +1,63 @@
+import RPi.GPIO as GPIO
 import time
-from threading import Thread
+import logging
 
-from machine import Pin, time_pulse_us
-from utime import sleep_us
+class HCSR04:
+    def __init__(self, trigger=24, echo=12):
+        self.trigger = trigger
+        self.echo = echo
 
-__version__ = "0.2.1"
-__author__ = "Roberto Sánchez"
-__license__ = "Apache License 2.0. https://www.apache.org/licenses/LICENSE-2.0"
+        GPIO.setmode(GPIO.BCM)
+        logging.debug("setmode")
 
+        GPIO.setup(self.trigger, GPIO.OUT)
+        logging.debug("setup trigger")
+        GPIO.setup(self.echo, GPIO.IN)
+        logging.debug("setup echo")
+        GPIO.output(self.trigger, False)
+        logging.debug("set trigger to False")
+        time.sleep(2)   # settle sensor
+        logging.debug("settled sensor")
 
-class HCSR04(Thread):
-    """
-    Driver to use the untrasonic sensor HC-SR04.
-    The sensor range is between 2cm and 4m.
+    def pulse(self):
+        logging.debug("pulsing")
 
-    The timeouts received listening to echo pin are converted to OSError('Out of range')
+        # NOTE: no debugging during pulse below, as messes up timings
+        GPIO.output(self.trigger, True) # send pulse for 0.00001 seconds
+        time.sleep(0.001)
+        GPIO.output(self.trigger, False)
 
-    """
+        pulse_start_ns = time.time_ns() # preset in case of instant exit from while loop
+        while GPIO.input(self.echo) == 0:   # wait for response
+            pulse_start_ns = time.time_ns()   # record time when response is recieved
 
-    # echo_timeout_us is based in chip range limit (400cm)
-    def __init__(self, trigger_pin=24, echo_pin=12, echo_timeout_us=500 * 2 * 30):
-        """
-        trigger_pin: Output pin to send pulses
-        echo_pin: Readonly pin to measure the distance. The pin should be protected with 1k resistor
-        echo_timeout_us: Timeout in microseconds to listen to echo pin.
-        By default is based in sensor limit range (4m)
-        """
-        self.echo_timeout_us = echo_timeout_us
-        # Init trigger pin (out)
-        self.trigger = Pin(trigger_pin, mode=Pin.OUT, pull=None)
-        self.trigger.value(0)
+        pulse_end_ns = time.time_ns() # preset in case of instant exit from while loop
+        while GPIO.input(self.echo) == 1:   # wait for pulse to end
+            pulse_end_ns = time.time_ns() # record pulse end time
+        
+        # NOTE: debug from here
+        logging.debug(f"pulse start: {pulse_start_ns}")
+        logging.debug(f"pulse end: {pulse_end_ns}")
 
-        # Init echo pin (in)
-        self.echo = Pin(echo_pin, mode=Pin.IN, pull=None)
+        pulse_duration = (pulse_end_ns - pulse_start_ns) / 1000000000   # convert from ns to s
+        logging.debug(f"pulse duration: {pulse_duration}")
+        distance = pulse_duration * 17150   # calculate distance using speed of sound (in cm/s)
 
-        self.distance = None
-        self.poll = 0.01
+        return distance
 
-    def _send_pulse_and_wait(self):
-        """
-        Send the pulse to trigger and listen on echo pin.
-        We use the method `machine.time_pulse_us()` to get the microseconds until the echo is received.
-        """
-        self.trigger.value(0)  # Stabilize the sensor
-        sleep_us(5)
-        self.trigger.value(1)
-        # Send a 10us pulse.
-        sleep_us(10)
-        self.trigger.value(0)
-        try:
-            pulse_time = time_pulse_us(self.echo, 1, self.echo_timeout_us)
-            # time_pulse_us returns -2 if there was timeout waiting for condition; and -1 if there was timeout during the main measurement. It DOES NOT raise an exception
-            # ...as of MicroPython 1.17: http://docs.micropython.org/en/v1.17/library/machine.html#machine.time_pulse_us
-            if pulse_time < 0:
-                MAX_RANGE_IN_CM = 500  # it's really ~400 but I've read people say they see it working up to ~460
-                pulse_time = int(MAX_RANGE_IN_CM * 29.1)  # 1cm each 29.1us
-            return pulse_time
-        except OSError as ex:
-            if ex.args[0] == 110:  # 110 = ETIMEDOUT
-                raise OSError("Out of range")
-            raise ex
-
-    def distance_mm(self):
-        """
-        Get the distance in milimeters without floating point operations.
-        """
-        pulse_time = self._send_pulse_and_wait()
-
-        # To calculate the distance we get the pulse_time and divide it by 2
-        # (the pulse walk the distance twice) and by 29.1 becasue
-        # the sound speed on air (343.2 m/s), that It's equivalent to
-        # 0.34320 mm/us that is 1mm each 2.91us
-        # pulse_time // 2 // 2.91 -> pulse_time // 5.82 -> pulse_time * 100 // 582
-        mm = pulse_time * 100 // 582
-        return mm
-
-    def distance_cm(self):
-        """
-        Get the distance in centimeters with floating point operations.
-        It returns a float
-        """
-        pulse_time = self._send_pulse_and_wait()
-
-        # To calculate the distance we get the pulse_time and divide it by 2
-        # (the pulse walk the distance twice) and by 29.1 becasue
-        # the sound speed on air (343.2 m/s), that It's equivalent to
-        # 0.034320 cm/us that is 1cm each 29.1us
-        cms = (pulse_time / 2) / 29.1
-        return cms
-
-    def run(self, unit):
-        while True:
-            self.distance = unit()  # update with new echo
-
-            time.sleep(self.poll)
-
+    def cleanup(self):
+        GPIO.cleanup()  # reset pins
+        logging.debug("cleaned up pins")
 
 if __name__ == "__main__":
-    hcsr = HCSR04(echo_timeout_us=1000000)
-    hcsr.setName("HCSR04")
-    hcsr.start()
+    # enable debug logging
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
 
-    while True:
-        print(f"distance: {hcsr.distance}")
+    sensor = HCSR04()
+    try:
+        while 1:
+            distance = sensor.pulse()
+            logging.info(f"Distance: {round(distance, 3)}cm")
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        sensor.cleanup()
