@@ -1,16 +1,16 @@
+from math import dist
 import RPi.GPIO as GPIO
 import time
 import logging
 
 class HCSR04:
-    def __init__(self, trigger=24, echo=12):
+    def __init__(self, trigger, echo):
         self.trigger = trigger
         self.echo = echo
 
         GPIO.setmode(GPIO.BCM)
         logging.debug("setmode")
-
-    def pulse(self):
+        
         GPIO.setup(self.trigger, GPIO.OUT)
         logging.debug("setup trigger")
         GPIO.setup(self.echo, GPIO.IN)
@@ -20,6 +20,7 @@ class HCSR04:
         time.sleep(2)   # settle sensor
         logging.debug("settled sensor")
 
+    def pulse(self):
         logging.debug("pulsing")
 
         # NOTE: no debugging during pulse below, as messes up timings
@@ -43,8 +44,6 @@ class HCSR04:
         logging.debug(f"pulse duration: {pulse_duration}")
         distance = pulse_duration * 17150   # calculate distance using speed of sound (in cm/s)
 
-        self.cleanup()
-
         return distance
 
     def cleanup(self):
@@ -53,13 +52,21 @@ class HCSR04:
 
 if __name__ == "__main__":
     # enable debug logging
-    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
-    sensor = HCSR04()
+    sensor = HCSR04(trigger=12, echo=24)
     try:
         while 1:
             distance = sensor.pulse()
-            logging.info(f"Distance: {round(distance, 3)}cm")
+            distance = round(distance, 3)
+
+            # logical bounds checking
+            if distance > 400:   # 400cm sensor range?
+                distance = f"ERROR ({distance})"    # log as sensor error
+
+            logging.info(f"Distance: {distance}cm")
             time.sleep(0.1)
     except KeyboardInterrupt:
         sensor.cleanup()
+    
+    sensor.cleanup()    # remember to perform manual cleanup
