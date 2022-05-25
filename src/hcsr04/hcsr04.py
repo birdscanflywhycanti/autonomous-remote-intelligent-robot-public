@@ -10,6 +10,7 @@ class HCSR04:
         GPIO.setmode(GPIO.BCM)
         logging.debug("setmode")
 
+    def pulse(self):
         GPIO.setup(self.trigger, GPIO.OUT)
         logging.debug("setup trigger")
         GPIO.setup(self.echo, GPIO.IN)
@@ -19,7 +20,6 @@ class HCSR04:
         time.sleep(2)   # settle sensor
         logging.debug("settled sensor")
 
-    def pulse(self):
         logging.debug("pulsing")
 
         # NOTE: no debugging during pulse below, as messes up timings
@@ -42,6 +42,8 @@ class HCSR04:
         pulse_duration = (pulse_end_ns - pulse_start_ns) / 1000000000   # convert from ns to s
         logging.debug(f"pulse duration: {pulse_duration}")
         distance = pulse_duration * 17150   # calculate distance using speed of sound (in cm/s)
+
+        self.cleanup()
 
         return distance
 
