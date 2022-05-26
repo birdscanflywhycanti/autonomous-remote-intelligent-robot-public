@@ -135,16 +135,16 @@ def pathing(path, unit_size, origin=False, curr_angle=0):
 
         x, y = x_, y_
 
-    """
+    
     # reorient to face north
     delta_angle = (
         0 - curr_angle
     )  # calculate the difference in between the current and the target angle
 
     instructions.append(
-        (perform_spin, delta_angle)
+        (perform_spin, (delta_angle, 0))
     )  # rotate the car to match the target angle by rotating the remaining distance
-    """
+    
 
     return instructions
 

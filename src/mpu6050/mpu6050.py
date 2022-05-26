@@ -22,7 +22,8 @@ class MPU6050(Thread):
 
         self.poll = 0.05  # poll every <self.poll> seconds
 
-        self.gyro_abs_z = 0     # preprocessing to save duplicate instructions
+        self.abs_z = 0     # preprocessing to save duplicate instructions
+        self.z = 0
         self.orientation = 0
 
     def run(self):
@@ -46,12 +47,13 @@ class MPU6050(Thread):
         logging.debug(f"orientation: {self.orientation}")
         
         x, y, z = self.mpu.gyro
-        self.gyro_abs_z = abs(math.degrees(z))
+        self.abs_z = abs(math.degrees(z))
+        self.z = math.degrees(z)
         
-        self.orientation += self.gyro_abs_z * self.poll
+        self.orientation += -self.z * self.poll
 
         if self.orientation >= 360:
-            self.orientation = 0
+            self.orientation -= 360
         elif self.orientation < 0:
             self.orientation += 355
 
@@ -65,4 +67,5 @@ if __name__ == "__main__":
     mpu.start()
 
     while True:
-        logging.debug(f"accelerometer: {mpu.acceleration}\ngyro: {mpu.gyro}")
+        logging.debug(f"orientation: {mpu.orientation}, z: {mpu.z}")
+        #logging.debug(f"accelerometer: {mpu.acceleration}\ngyro: {mpu.gyro}")

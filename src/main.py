@@ -43,7 +43,7 @@ mpu = MPU6050()
 mpu.setName("MPU6050")
 mpu.start()
 
-#hcsr = HCSR04(trigger_pin=16, echo_pin=0, echo_timeout_us=1000000)
+#hcsr = HCSR04(trigger_pin=12, echo_pin=24, echo_timeout_ns=1000000)
 #hcsr.setName("HCSR04")
 #hcsr.start()
 
@@ -56,7 +56,7 @@ def main(TB, mpu):
     """
     input_matrix = [
         [1, 0, 0, 1],
-        [1, 0, 0, 1],
+        [1, 0, 1, 1],
         [1, 0, 1, 0],
         [1, 0, 1, 1],
         [1, 0, 0, 1],

@@ -12,6 +12,16 @@ import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
 import logging
 
+def smallestAngle(currentAngle, targetAngle):
+    # Subtract the angles, constraining the value to [0, 360)
+    diff = ( targetAngle - currentAngle) % 360
+
+    # If we are more than 180 we're taking the long way around.
+    # Let's instead go in the shorter, negative direction
+    if diff > 180 :
+        diff = -(360 - diff)
+
+    return diff
 
 # Function to spin an angle in degrees
 def perform_spin(delta, target, TB, mpu, max_power):
@@ -19,7 +29,15 @@ def perform_spin(delta, target, TB, mpu, max_power):
 
     Args:
         delta (float): angle to spin in degrees.
+        target (float): angle to spin to in degrees.
+        TB (ThunderBorg): ThunderBorg object.
+        mpu (MPU6050): MPU6050 object.
+        max_power (float): maximum power to use.
     """
+
+    delta = smallestAngle(mpu.orientation, target)
+
+    logging.debug(f"DELTA: {delta}")
 
     power = max_power * 0.75
 
@@ -32,10 +50,7 @@ def perform_spin(delta, target, TB, mpu, max_power):
         # Right turn
         drive_left = +1.0
         drive_right = -1.0
-
-    offset = (mpu.orientation + delta) - (target + delta)   # calculate offset from target+delta versus actual+delta
-    delta += offset # update delta with offset to align according to actual initial angle
-
+    
     # Set the motors running
     TB.SetMotor1(drive_right * power)
     TB.SetMotor2(drive_left * power)
@@ -49,17 +64,15 @@ def perform_spin(delta, target, TB, mpu, max_power):
     total_rotation = 0
 
     while True:
-        abs_z = mpu.gyro_abs_z
-        sample = mpu.abs_z * sampling
+        abs_z = mpu.abs_z
+        sample = abs_z * sampling
 
         # print("Gyro X:%.2f, Y: %.2f, Z: %.2f rad/s" % (x, y, z))
-        if logging.isEnabledFor(logging.DEBUG):
-            x, y, z = mpu.gyro
-            x, y, z = math.degrees(x), math.degrees(y), math.degrees(z)
-            logging.debug(
-                "Gyro: X:%.2f, Y: %.2f, Z: %.2f deg/s \t sample:%.2f \t total:%.2f"
-                % (x, y, z, sample, total_rotation)
-            )
+        x, y, z = mpu.gyro
+        logging.debug(
+            "Gyro: X:%.2f, Y: %.2f, Z: %.2f deg/s \t sample:%.2f \t total:%.2f"
+            % (math.degrees(x), math.degrees(y), math.degrees(z), sample, total_rotation)
+        )
         # print(total_rotation)
 
         # NOTE: z-axis experimentally defined as 2d plane orientation
