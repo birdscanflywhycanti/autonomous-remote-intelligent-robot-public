@@ -12,6 +12,16 @@ import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
 import logging
 
+def smallestAngle(currentAngle, targetAngle):
+    # Subtract the angles, constraining the value to [0, 360)
+    diff = ( targetAngle - currentAngle) % 360
+
+    # If we are more than 180 we're taking the long way around.
+    # Let's instead go in the shorter, negative direction
+    if diff > 180 :
+        diff = -(360 - diff)
+
+    return diff
 
 # Function to spin an angle in degrees
 def perform_spin(delta, target, TB, mpu, max_power):
@@ -25,8 +35,9 @@ def perform_spin(delta, target, TB, mpu, max_power):
         max_power (float): maximum power to use.
     """
 
-    # 
-    delta = target - mpu.orientation
+    delta = smallestAngle(mpu.orientation, target)
+
+    logging.debug(f"DELTA: {delta}")
 
     power = max_power * 0.75
 
@@ -39,7 +50,7 @@ def perform_spin(delta, target, TB, mpu, max_power):
         # Right turn
         drive_left = +1.0
         drive_right = -1.0
-
+    
     # Set the motors running
     TB.SetMotor1(drive_right * power)
     TB.SetMotor2(drive_left * power)
