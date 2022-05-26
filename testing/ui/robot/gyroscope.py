@@ -49,7 +49,7 @@ def perform_spin(delta, target, TB, mpu, max_power):
     total_rotation = 0
 
     while True:
-        abs_z = mpu.gyro_abs_z
+        abs_z = mpu.abs_z
         sample = mpu.abs_z * sampling
 
         # print("Gyro X:%.2f, Y: %.2f, Z: %.2f rad/s" % (x, y, z))

@@ -23,7 +23,8 @@ def a_star(matrix, start_node, end_node):
     start = grid.node(*start_node)
     end = grid.node(*end_node)
 
-    finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
+    #finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
+    finder = AStarFinder()
     path, runs = finder.find_path(start, end, grid)
 
     # pathing instruction
