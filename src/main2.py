@@ -64,7 +64,7 @@ class Graph:
             raise ValueError("goal id not in graph")
 
 
-class GridWorld(Graph):
+class Grid(Graph):
     def __init__(self, x_dim, y_dim):
         self.x_dim = x_dim
         self.y_dim = y_dim
@@ -97,7 +97,6 @@ class GridWorld(Graph):
         return self.__str__()
 
     def printGrid(self):
-        print("** GridWorld **")
         for row in self.cells:
             print(row)
 
@@ -229,8 +228,10 @@ class D_Star_Lite:
 
             if ( graph.cells[new_coords[1]][new_coords[0]] == -1 ):  # just ran into new obstacle
                 s_new = s_current  # need to hold tight and scan/replan first
+                
             self.updateObsticles(graph, queue, s_new, k_m, scan_range)
             # print(graph)
+            
             k_m += self.heuristic_from_s(graph, s_last, s_new)
             self.computeShortestPath(graph, queue, s_current, k_m)
 
@@ -382,7 +383,7 @@ def d_star_loop(TB, mpu):#input_matrix):
     ]
     
     
-    graph = GridWorld(len(input_matrix[0]), len(input_matrix))
+    graph = Grid(len(input_matrix[0]), len(input_matrix))
     d_star_lite = D_Star_Lite()
     for i in range(len(input_matrix)):
         for j in range(len(input_matrix[i])):
@@ -407,8 +408,11 @@ def d_star_loop(TB, mpu):#input_matrix):
     
     curr_angle=0
     s_new = None
+    
+    
+    
+    
     while s_new != "goal":
-        
         x_, y_, distance = scan_next(max_power, graph, d_star_lite, s_current, curr_angle)
         # logical bounds checking
         if distance < 60 and distance != -1:
@@ -418,10 +422,15 @@ def d_star_loop(TB, mpu):#input_matrix):
             perform_drive(1,TB, mpu, max_power)
             s_current = s_new
 
-        
-        
-        
+
+            #position of these two lines will need testing
+            k_m += d_star_lite.heuristic_from_s(graph, s_last, s_new)
+            d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
+            
         print(s_new)
+
+
+
 
 def scan_next(max_power, graph, d_star_lite, s_current, curr_angle):
     next_location = d_star_lite.nextInShortestPath(graph, s_current)
@@ -437,6 +446,9 @@ def scan_next(max_power, graph, d_star_lite, s_current, curr_angle):
     distance = hcsr.pulse()
     distance = round(distance, 3)
     return x_,y_,distance
+
+
+
 
 
 if __name__ == "__main__":
