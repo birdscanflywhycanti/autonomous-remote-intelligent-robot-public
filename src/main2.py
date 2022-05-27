@@ -378,7 +378,7 @@ def d_star_loop(TB, mpu):  # input_matrix):
         [0, 0, 0, 0, 0, 0],
     ]
 
-    graph = Grid(len(input_matrix[0]), len(input_matrix))
+    graph = Grid(len(input_matrix), len(input_matrix[0]))
     d_star_lite = D_Star_Lite()
     for i in range(len(input_matrix)):
         for j in range(len(input_matrix[i])):

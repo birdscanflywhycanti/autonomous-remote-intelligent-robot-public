@@ -290,23 +290,21 @@ class D_Star_Lite:
 def d_star_loop():#input_matrix):
 
     input_matrix = [
-        [0, 0, -1, 0,  0, 0],
-        [0, 0, -1, 0,  0, 0],
-        [0, 0, -1, 0,  0, 0],
-        [0, 0, -1, 0,  0, 0],
-        [0, 0,  0, 0,  0, 0],
-        [0, 0,  0, 0,  0, 0],
+        [0, -1, 0,  0, 0],
+        [0, -1, 0,  0, 0],
+        [0, -1, 0,  0, 0],
+        [0, -1, 0,  0, 0],
+        [0,  0, 0,  0, 0],
+        [0,  0, 0,  0, 0]
     ]
     
     
-    graph = Grid(len(input_matrix[0]), len(input_matrix))
+    graph = Grid(len(input_matrix), len(input_matrix[0]))
     d_star_lite = D_Star_Lite()
-    for i in range(len(input_matrix)):
-        for j in range(len(input_matrix[i])):
-            graph.cells[i][j] = input_matrix[i][j]
+    graph.cells = input_matrix
     print("**Initial Environment**")
     graph.printGrid()
-    s_start = "x1y1"
+    s_start = "x0y0"
     s_goal = "x3y0"
     goal_coords = d_star_lite.stateNameToCoords(s_goal)
     graph.setStart(s_start)
@@ -363,7 +361,7 @@ def scan_next(i, graph, d_star_lite, s_current, curr_angle):
     #distance = round(distance, 3)
     distance = 66
     
-    if i == 4 or i == 10:
+    if i == 8:
         distance = 12
     return next_location, x_, y_,distance
 
