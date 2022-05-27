@@ -1,8 +1,7 @@
 """A Class used for selecting which algorithm to use
 """
 from algorithms.a_star import a_star
-from algorithms.d_star_lite import d_star_lite
-
+from algorithms.d_star_lite import D_Star_Lite, Node, Graph, Grid
 
 class Algorithm:
     """A Class used for selecting which algorithm to use
@@ -14,7 +13,6 @@ class Algorithm:
 
     Methods:
         use_a_star: a function that returns a path using the A* algorithm
-        use_d_star_lite: a function that returns a path using the D* Lite algorithm
     """
 
     def __init__(self, matrix, start_node, end_node):
@@ -29,11 +27,3 @@ class Algorithm:
             path: a list of nodes representing the path the robot should take
         """
         return a_star(self.matrix, self.start_node, self.end_node)
-
-    def use_d_star_lite(self):
-        """A function that returns a path using the D* Lite algorithm
-
-        Returns:
-            path: a list of nodes representing the path the robot should take
-        """
-        return d_star_lite(self.matrix, self.start_node, self.end_node)
