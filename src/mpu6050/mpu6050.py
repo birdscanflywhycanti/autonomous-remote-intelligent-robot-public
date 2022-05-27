@@ -1,12 +1,11 @@
 # create a singleton sensor class to house gyroscope instance and provide data as thread
+import logging
+import math
 import time
 from threading import Thread
 
 import adafruit_mpu6050
 import board
-import math
-
-import logging
 
 
 class MPU6050(Thread):
@@ -25,6 +24,7 @@ class MPU6050(Thread):
         self.abs_z = 0     # preprocessing to save duplicate instructions
         self.z = 0
         self.orientation = 0
+        self.orientation_flag = False
 
     def run(self):
         """ Update loop to poll MPU sensor for gyro and accelerometer data.
@@ -34,8 +34,9 @@ class MPU6050(Thread):
         while True:
             self.gyro = self.mpu.gyro
             self.acceleration = self.mpu.acceleration
-
-            self.gyroscopic()
+            
+            if self.orientation_flag:
+                self.gyroscopic()
 
             time.sleep(self.poll)
 

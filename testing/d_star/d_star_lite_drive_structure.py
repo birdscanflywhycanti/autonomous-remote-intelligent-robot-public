@@ -319,26 +319,30 @@ def d_star_loop():#input_matrix):
     
     graph = Grid(len(input_matrix), len(input_matrix[0]))
     d_star_lite = D_Star_Lite()
-    graph.cells = input_matrix
+    
     print("**Initial Environment**")
+    
+    graph.cells = input_matrix
+    
+
     s_start = "x0y0"
     s_goal = "x3y0"
     goal_coords = d_star_lite.stateNameToCoords(s_goal)
     graph.setStart(s_start)
     graph.setGoal(s_goal)
 
+
+
     k_m = 0
     s_last = s_start
     queue = []
-    
     graph, queue, k_m = d_star_lite.initDStarLite(graph, queue, s_start, s_goal, k_m)
-    
     s_current = s_start
     pos_coords = d_star_lite.stateNameToCoords(s_current)
     d_star_lite.updateObsticles(graph, queue, s_current, k_m, 2)
-    
     curr_angle=0
     s_new = None
+    
     
     d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
     graph.printGrid(s_start, s_goal, s_current)
@@ -356,6 +360,9 @@ def d_star_loop():#input_matrix):
         else:
             #perform_drive(1,TB, mpu, max_power)
             s_current = s_new
+            graph.printGrid(s_start, s_goal, s_current)
+            
+            
         k_m += d_star_lite.heuristic_from_s(graph, s_last, s_new)
         d_star_lite.computeShortestPath(graph, queue, s_current, k_m)      
         d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
@@ -367,19 +374,22 @@ def scan_next(i, graph, d_star_lite, s_current, curr_angle):
     next_location = d_star_lite.nextInShortestPath(graph, s_current)
     current = d_star_lite.stateNameToCoords(s_current)
     next = d_star_lite.stateNameToCoords(next_location)
+    
+    
     x, y = (current[0], current[1])
     x_, y_ = (next[0],next[1])
+    
     unit_target_vector = (x_ - x, y - y_)
     target_angle = calculate_angle(unit_target_vector)
 
     delta_angle = (target_angle - curr_angle)
-    print("Facing " + str(target_angle))
+    print("Facing " + str(target_angle) + " || Turn " + str(delta_angle))
     #perform_spin(delta_angle, target_angle, TB, mpu, max_power)
     #distance = hcsr.pulse()
     #distance = round(distance, 3)
     distance = 66
     
-    if i == 8:
+    if i == 8 or i == 10:
         distance = 12
     return next_location, x_, y_,distance, target_angle
 

@@ -2,6 +2,7 @@
 Rotate given angle, tracked using gyroscope.
 """
 
+import logging
 import math
 import sys
 import time
@@ -10,7 +11,6 @@ import adafruit_mpu6050
 import board
 import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
-import logging
 
 def smallestAngle(currentAngle, targetAngle):
     # Subtract the angles, constraining the value to [0, 360)
@@ -36,11 +36,17 @@ def perform_spin(delta, target, TB, mpu, max_power):
     """
 
     delta = smallestAngle(mpu.orientation, target)
-
+    delta = int(delta)
+    
     logging.debug(f"DELTA: {delta}")
 
-    power = max_power * 0.75
-
+    power = max_power * 0.8
+    delta = int(delta)
+    if abs(delta) <  30:
+        delta = delta * -1
+        power = max_power * 0.7
+        
+        
     if delta < 0.0:
         # Left turn
         drive_left = -1.0
@@ -50,6 +56,8 @@ def perform_spin(delta, target, TB, mpu, max_power):
         # Right turn
         drive_left = +1.0
         drive_right = -1.0
+    
+    mpu.orientation_flag = True
     
     # Set the motors running
     TB.SetMotor1(drive_right * power)
@@ -108,6 +116,8 @@ def perform_spin(delta, target, TB, mpu, max_power):
 
     # Turn the motors off
     TB.MotorsOff()
+    
+    mpu.orientation_flag = False
 
     logging.debug(f"total rotation: {total_rotation}")
 
