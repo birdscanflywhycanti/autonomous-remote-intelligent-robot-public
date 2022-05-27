@@ -3,12 +3,13 @@ import RPi.GPIO as GPIO
 import time
 import logging
 
-class HCSR04:
-    def __init__(self, trigger, echo, echo_timeout_ns):
+class HCSR04():
+    def __init__(self, trigger=12, echo=24, echo_timeout_ns=3000000000):
         self.trigger = trigger
         self.echo = echo
         self.echo_timeout_ns = echo_timeout_ns
 
+    def setup(self):
         GPIO.setmode(GPIO.BCM)
         logging.debug("setmode")
         
@@ -18,7 +19,7 @@ class HCSR04:
         logging.debug("setup echo")
         GPIO.output(self.trigger, False)
         logging.debug("set trigger to False")
-        time.sleep(2)   # settle sensor
+        time.sleep(1)   # settle sensor
         logging.debug("settled sensor")
 
     def pulse(self):
@@ -43,7 +44,7 @@ class HCSR04:
         while GPIO.input(self.echo) == 1:   # wait for pulse to end
             pulse_end_ns = time.time_ns() # record pulse end time
 
-            if (pulse_start_ns - pulse_sent) + (pulse_end_ns - pulse_start_ns) > self.echo_timeout_ns:  # if time between pulse send and pulse end is greater than timeout
+            if pulse_end_ns - pulse_sent > self.echo_timeout_ns:  # if time between pulse send and pulse end is greater than timeout
                 logging.debug("pulse end timeout")
                 return -1
         
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     # enable debug logging
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
-    sensor = HCSR04(trigger=12, echo=24)
+    sensor = HCSR04(trigger=12, echo=24, echo_timeout_ns=3000000000)    # 3 second timeout (in nanoseconds)
     try:
         while 1:
             distance = sensor.pulse()
