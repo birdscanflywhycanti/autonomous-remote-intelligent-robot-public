@@ -96,9 +96,26 @@ class Grid(Graph):
     def __repr__(self):
         return self.__str__()
 
-    def printGrid(self):
-        for row in self.cells:
-            print(row)
+    def printGrid(self, start, end, current=None):
+        d = D_Star_Lite()
+        test = [0] * len(self.cells)
+        for i in range(len(self.cells)):
+            test[i] = [0] * len(self.cells[0])
+
+        for i in range(len(self.cells)):
+            for j in range(len(self.cells[i])):
+                test[i][j] = self.cells[i][j]
+        start = d.stateNameToCoords(start)
+        end = d.stateNameToCoords(end)
+        current = d.stateNameToCoords(current)
+        test[start[1]][start[0]] = "S"
+        test[end[1]][end[0]] = "E"
+        test[current[1]][current[0]] = "X"
+        for row in test:
+            string = ""
+            for col in row:
+                string += f"{col:>3}"
+            print(string)
 
     def printGValues(self):
         for j in range(self.y_dim):
@@ -370,12 +387,12 @@ def d_star_loop(TB, mpu):  # input_matrix):
     else:
         max_power = VOLTAGE_OUT / float(VOLTAGE_IN)
     input_matrix = [
-        [0, 0, -1, 0, 0, 0],
-        [0, 0, -1, 0, 0, 0],
-        [0, 0, -1, 0, 0, 0],
-        [0, 0, -1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0],
+        [0, -1, 0, 0, 0],
+        [0, -1, 0, 0, 0],
+        [0, -1, 0, 0, 0],
+        [0, -1, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
     ]
 
     graph = Grid(len(input_matrix), len(input_matrix[0]))
@@ -384,8 +401,7 @@ def d_star_loop(TB, mpu):  # input_matrix):
         for j in range(len(input_matrix[i])):
             graph.cells[i][j] = input_matrix[i][j]
     print("**Initial Environment**")
-    graph.printGrid()
-    s_start = "x1y1"
+    s_start = "x0y0"
     s_goal = "x3y0"
     goal_coords = d_star_lite.stateNameToCoords(s_goal)
     graph.setStart(s_start)
@@ -405,26 +421,27 @@ def d_star_loop(TB, mpu):  # input_matrix):
     s_new = None
 
     d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
+    graph.printGrid(s_start, s_goal, s_current)
     while s_new != s_goal:
-        x_, y_, distance = scan_next(
-            max_power, graph, d_star_lite, s_current, curr_angle
+        s_new, x_, y_, distance = scan_next(
+            i, graph, d_star_lite, s_current, curr_angle
         )
+
         # logical bounds checking
         if distance < 60 and distance != -1:
             s_new = s_current
             graph.cells[y_][x_] = -2
             d_star_lite.updateObsticles(graph, queue, s_current, k_m, 1)
-            print("**Obsticle Detected**")
-            graph.printGrid()
+            print("**Obsticle Detected at " + s_new + "**")
+            graph.printGrid(s_start, s_goal, s_current)
         else:
-            perform_drive(1,TB, mpu, max_power)
+            perform_drive(1, TB, mpu, max_power)
             s_current = s_new
         k_m += d_star_lite.heuristic_from_s(graph, s_last, s_new)
-        d_star_lite.computeShortestPath(graph, queue, s_current, k_m)      
+        d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
         d_star_lite.updateObsticles(graph, queue, s_current, k_m, 1)
         print(s_new)
         i += 1
-        print(s_new)
 
 
 def scan_next(max_power, graph, d_star_lite, s_current, curr_angle):
@@ -437,9 +454,9 @@ def scan_next(max_power, graph, d_star_lite, s_current, curr_angle):
     target_angle = calculate_angle(unit_target_vector)
     delta_angle = target_angle - curr_angle
     # spin to delta angle
-    # perform_spin(delta_angle, target_angle, TB, mpu, max_power)
-    # distance = hcsr.pulse()
-    # distance = round(distance, 3)
+    perform_spin(delta_angle, target_angle, TB, mpu, max_power)
+    distance = hcsr.pulse()
+    distance = round(distance, 3)
     distance = 66
 
     # if i ==4:

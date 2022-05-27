@@ -294,7 +294,7 @@ maze = [
 ]
 
 graph = GridWorld(len(maze), len(maze[0]))
-
+    
 d_star_lite = D_Star_Lite()
 graph.cells = maze
 
