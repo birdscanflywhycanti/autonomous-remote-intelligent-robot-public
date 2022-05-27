@@ -411,20 +411,18 @@ def d_star_loop(TB, mpu):  # input_matrix):
         )
         # logical bounds checking
         if distance < 60 and distance != -1:
+            s_new = s_current
             graph.cells[y_][x_] = -2
             d_star_lite.updateObsticles(graph, queue, s_current, k_m, 1)
             print("**Obsticle Detected**")
             graph.printGrid()
-            s_new = s_current
         else:
-            perform_drive(1, TB, mpu, max_power)
+            perform_drive(1,TB, mpu, max_power)
             s_current = s_new
-
-            # position of these two lines will need testing
-            s_current = s_new
-            k_m += d_star_lite.heuristic_from_s(graph, s_last, s_new)
-            d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
-            d_star_lite.updateObsticles(graph, queue, s_current, k_m, 1)
+        k_m += d_star_lite.heuristic_from_s(graph, s_last, s_new)
+        d_star_lite.computeShortestPath(graph, queue, s_current, k_m)      
+        d_star_lite.updateObsticles(graph, queue, s_current, k_m, 1)
+        print(s_new)
         i += 1
         print(s_new)
 

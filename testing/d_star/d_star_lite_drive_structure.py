@@ -342,10 +342,10 @@ def d_star_loop():#input_matrix):
         else:
             #perform_drive(1,TB, mpu, max_power)
             s_current = s_new
-            k_m += d_star_lite.heuristic_from_s(graph, s_last, s_new)
-            d_star_lite.computeShortestPath(graph, queue, s_current, k_m)      
-            d_star_lite.updateObsticles(graph, queue, s_current, k_m, 1)
-            print(s_new)
+        k_m += d_star_lite.heuristic_from_s(graph, s_last, s_new)
+        d_star_lite.computeShortestPath(graph, queue, s_current, k_m)      
+        d_star_lite.updateObsticles(graph, queue, s_current, k_m, 1)
+        print(s_new)
         i +=1
 
 
@@ -363,7 +363,7 @@ def scan_next(i, graph, d_star_lite, s_current, curr_angle):
     #distance = round(distance, 3)
     distance = 66
     
-    if i == 4 or i == 6:
+    if i == 4 or i == 10:
         distance = 12
     return next_location, x_, y_,distance
 
