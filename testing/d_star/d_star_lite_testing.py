@@ -293,12 +293,10 @@ maze = [
     [0, 0, 0, 0, 0, 0],
 ]
 
-graph = GridWorld(len(maze[0]), len(maze))
+graph = GridWorld(len(maze), len(maze[0]))
 
 d_star_lite = D_Star_Lite()
-for i in range(len(maze)):
-    for j in range(len(maze[i])):
-        graph.cells[i][j] = maze[i][j]
+graph.cells = maze
 
 graph.printGrid()
 

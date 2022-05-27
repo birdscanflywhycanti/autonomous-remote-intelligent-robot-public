@@ -73,7 +73,7 @@ def main(TB, mpu):
         [0, 0, 0, 0, 0, 0],
     ]
 
-    graph = Grid(len(input_matrix[0]), len(input_matrix))
+    graph = Grid(len(input_matrix), len(input_matrix[0]))
     d_star_lite = D_Star_Lite()
 
     logging.info("Created D* and Grid")
