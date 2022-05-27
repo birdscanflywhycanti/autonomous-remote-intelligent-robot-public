@@ -84,9 +84,26 @@ class Grid(Graph):
     def __repr__(self):
         return self.__str__()
 
-    def printGrid(self):
-        for row in self.cells:
-            print(row)
+    def printGrid(self, start, end, current=None):
+        d = D_Star_Lite()
+        test = [0] * len(self.cells)
+        for i in range(len(self.cells)):
+            test[i] = [0] * len(self.cells[0])
+        
+        for i in range(len(self.cells)):
+            for j in range(len(self.cells[i])):
+                test[i][j] = self.cells[i][j]
+        start = d.stateNameToCoords(start)
+        end = d.stateNameToCoords(end)
+        current = d.stateNameToCoords(current)
+        test[start[1]][start[0]] = "S"
+        test[end[1]][end[0]] = "E"
+        test[current[1]][current[0]] = "X"
+        for row in test:
+            string = ""
+            for col in row:
+                string += f'{col:>3}'
+            print(string)
 
     def printGValues(self):
         for j in range(self.y_dim):

@@ -1,6 +1,6 @@
+import copy
 import heapq
 import math
-import copy
 
 
 class Node:
@@ -91,7 +91,7 @@ class Grid(Graph):
         test = [0] * len(self.cells)
         for i in range(len(self.cells)):
             test[i] = [0] * len(self.cells[0])
-
+        
         for i in range(len(self.cells)):
             for j in range(len(self.cells[i])):
                 test[i][j] = self.cells[i][j]
@@ -104,7 +104,7 @@ class Grid(Graph):
         for row in test:
             string = ""
             for col in row:
-                string += f"{col:>3}"
+                string += f'{col:>3}'
             print(string)
 
     def printGValues(self):
@@ -256,7 +256,7 @@ class D_Star_Lite:
         self.computeShortestPath(graph, queue, s_start, k_m)
         return (graph, queue, k_m)
 
-    def updateObsticles(self, graph, queue, s_current, k_m, scan_range=1):
+    def updateObsticles(self, graph, queue, s_current, k_m, scan_range=20):
         states_to_update = {}
         range_checked = 0
         if scan_range >= 1:
@@ -275,9 +275,7 @@ class D_Star_Lite:
                 for neighbor in graph.graph[state].children:
                     if neighbor not in new_set:
                         neighbor_coords = self.stateNameToCoords(neighbor)
-                        new_set[neighbor] = graph.cells[neighbor_coords[1]][
-                            neighbor_coords[0]
-                        ]
+                        new_set[neighbor] = graph.cells[neighbor_coords[1]][ neighbor_coords[0]]
             range_checked += 1
             states_to_update = new_set
 
@@ -302,22 +300,26 @@ class D_Star_Lite:
         return new_obstacle
 
 
-def d_star_loop():  # input_matrix):
+
+
+
+
+
+def d_star_loop():#input_matrix):
 
     input_matrix = [
-        [0, -1, 0, 0, 0],
-        [0, -1, 0, 0, 0],
-        [0, -1, 0, 0, 0],
-        [0, -1, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
+        [0, -1, 0,  0, 0],
+        [0, -1, 0,  0, 0],
+        [0, -1, 0,  0, 0],
+        [0, -1, 0,  0, 0],
+        [0,  0, 0,  0, 0],
+        [0,  0, 0,  0, 0]
     ]
-
+    
+    
     graph = Grid(len(input_matrix), len(input_matrix[0]))
     d_star_lite = D_Star_Lite()
-    for i in range(len(input_matrix)):
-        for j in range(len(input_matrix[i])):
-            graph.cells[i][j] = input_matrix[i][j]
+    graph.cells = input_matrix
     print("**Initial Environment**")
     s_start = "x0y0"
     s_goal = "x3y0"
@@ -328,58 +330,58 @@ def d_star_loop():  # input_matrix):
     k_m = 0
     s_last = s_start
     queue = []
-
+    
     graph, queue, k_m = d_star_lite.initDStarLite(graph, queue, s_start, s_goal, k_m)
-
+    
     s_current = s_start
     pos_coords = d_star_lite.stateNameToCoords(s_current)
     d_star_lite.updateObsticles(graph, queue, s_current, k_m, 2)
-
-    curr_angle = 0
+    
+    curr_angle=0
     s_new = None
-
+    
     d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
     graph.printGrid(s_start, s_goal, s_current)
     i = 0
     while s_new != s_goal:
-        s_new, x_, y_, distance = scan_next(
-            i, graph, d_star_lite, s_current, curr_angle
-        )
+        s_new, x_, y_, distance, curr_angle = scan_next(i, graph, d_star_lite, s_current, curr_angle)
 
         # logical bounds checking
         if distance < 60 and distance != -1:
             s_new = s_current
             graph.cells[y_][x_] = -2
-            d_star_lite.updateObsticles(graph, queue, s_current, k_m, 1)
+            d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
             print("**Obsticle Detected at " + s_new + "**")
             graph.printGrid(s_start, s_goal, s_current)
         else:
-            # perform_drive(1,TB, mpu, max_power)
+            #perform_drive(1,TB, mpu, max_power)
             s_current = s_new
         k_m += d_star_lite.heuristic_from_s(graph, s_last, s_new)
-        d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
-        d_star_lite.updateObsticles(graph, queue, s_current, k_m, 1)
-        print(s_new)
+        d_star_lite.computeShortestPath(graph, queue, s_current, k_m)      
+        d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
+        print(s_current)
         i += 1
 
 
-def scan_next(max_power, graph, d_star_lite, s_current, curr_angle):
+def scan_next(i, graph, d_star_lite, s_current, curr_angle):
     next_location = d_star_lite.nextInShortestPath(graph, s_current)
     current = d_star_lite.stateNameToCoords(s_current)
     next = d_star_lite.stateNameToCoords(next_location)
     x, y = (current[0], current[1])
-    x_, y_ = (next[0], next[1])
+    x_, y_ = (next[0],next[1])
     unit_target_vector = (x_ - x, y - y_)
     target_angle = calculate_angle(unit_target_vector)
-    delta_angle = target_angle - curr_angle
-    # perform_spin(delta_angle, target_angle, TB, mpu, max_power)
-    # distance = hcsr.pulse()
-    # distance = round(distance, 3)
-    distance = 66
 
+    delta_angle = (target_angle - curr_angle)
+    print("Facing " + str(target_angle))
+    #perform_spin(delta_angle, target_angle, TB, mpu, max_power)
+    #distance = hcsr.pulse()
+    #distance = round(distance, 3)
+    distance = 66
+    
     if i == 8:
         distance = 12
-    return next_location, x_, y_, distance
+    return next_location, x_, y_,distance, target_angle
 
 
 def calculate_angle(unit_target_vector):
@@ -396,5 +398,5 @@ def calculate_angle(unit_target_vector):
     # print(r)
     return angle
 
-
 d_star_loop()
+

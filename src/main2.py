@@ -4,12 +4,13 @@
 import logging
 import sys
 import time
+
 import ThunderBorg3 as ThunderBorg  # conversion for python 3
 from algorithms.algorithm import D_Star_Lite, Graph, Grid, Node
 from hcsr04 import HCSR04
 from mpu6050 import MPU6050
-from robot.drive import follow, pathing, calculate_angle
 from robot.accelerometer import perform_drive
+from robot.drive import calculate_angle, follow, pathing
 from robot.gyroscope import perform_spin
 
 # Setup the ThunderBorg
@@ -78,14 +79,10 @@ def main(TB, mpu):
 
     logging.info("Created D* and Grid")
     
-    for i in range(len(input_matrix)):
-        for j in range(len(input_matrix[i])):
-            graph.cells[i][j] = input_matrix[i][j]
+    graph.cells = input_matrix
     
     logging.info("Initialised environment:")
-    graph.printGrid()
-    
-    s_start = "x1y1"
+    s_start = "x0y0"
     s_goal = "x3y0"
     goal_coords = d_star_lite.stateNameToCoords(s_goal)
     graph.setStart(s_start)
@@ -100,12 +97,12 @@ def main(TB, mpu):
     s_current = s_start
     pos_coords = d_star_lite.stateNameToCoords(s_current)
     d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
+    curr_angle=0
     s_new = None
-
     logging.info("Initialised D*")
 
     d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
-    
+    graph.printGrid(s_start, s_goal, s_current)
     logging.info("Found initial shortest path")
 
     while s_new != s_goal:
@@ -116,9 +113,9 @@ def main(TB, mpu):
         # logical bounds checking
         if distance < 40 and distance != -1:
             graph.cells[y_][x_] = -2
-            d_star_lite.updateObsticles(graph, queue, s_current, k_m, 1)
+            d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
             logging.info(f"Found obstacle at {x_},{y_}")
-            graph.printGrid()
+            graph.printGrid(s_start, s_goal, s_current)
             
         else:
             logging.info(f"Moving to {x_}, {y_}")
@@ -127,10 +124,10 @@ def main(TB, mpu):
 
             s_current = s_new # update current position with new position
     
-            # position of these two lines will need testing
-            k_m += d_star_lite.heuristic_from_s(graph, s_last, s_current)
-            d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
-            d_star_lite.updateObsticles(graph, queue, s_current, k_m, 1)
+        # position of these two lines will need testing
+        k_m += d_star_lite.heuristic_from_s(graph, s_last, s_current)
+        d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
+        d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
 
     logging.info("Found goal!")
 
