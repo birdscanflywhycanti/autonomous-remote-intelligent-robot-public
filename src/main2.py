@@ -220,18 +220,20 @@ class D_Star_Lite:
         if s_current == graph.goal:
             return "goal", k_m
         else:
-            
+
             # Call drive robot here
             s_last = s_current
             s_new = self.nextInShortestPath(graph, s_current)
             new_coords = self.stateNameToCoords(s_new)
 
-            if ( graph.cells[new_coords[1]][new_coords[0]] == -1 ):  # just ran into new obstacle
+            if (
+                graph.cells[new_coords[1]][new_coords[0]] == -1
+            ):  # just ran into new obstacle
                 s_new = s_current  # need to hold tight and scan/replan first
-                
+
             self.updateObsticles(graph, queue, s_new, k_m, scan_range)
             # print(graph)
-            
+
             k_m += self.heuristic_from_s(graph, s_last, s_new)
             self.computeShortestPath(graph, queue, s_current, k_m)
 
@@ -297,10 +299,6 @@ class D_Star_Lite:
         return new_obstacle
 
 
-
-
-
-
 from robot.accelerometer import perform_drive
 from robot.gyroscope import perform_spin
 
@@ -317,7 +315,9 @@ if not TB.foundChip:
     if len(boards) == 0:
         logging.warning("No ThunderBorg found, check you are attached :)")
     else:
-        logging.warning("No ThunderBorg at address %02X, but we did find boards:" % (i2cAddress))
+        logging.warning(
+            "No ThunderBorg at address %02X, but we did find boards:" % (i2cAddress)
+        )
         for board in boards:
             logging.info("%02X (%d)" % (board, board))
         logging.info(
@@ -333,9 +333,10 @@ mpu = MPU6050()
 mpu.setName("MPU6050")
 mpu.start()
 
-hcsr = HCSR04(trigger_pin=16, echo_pin=0, echo_timeout_us=1000000)
+hcsr = HCSR04(trigger=16, echo=0, echo_timeout_ns=10000000)
 hcsr.setName("HCSR04")
 hcsr.start()
+
 
 def calculate_angle(unit_target_vector):
 
@@ -352,12 +353,7 @@ def calculate_angle(unit_target_vector):
     return angle
 
 
-
-
-
-
-
-def d_star_loop(TB, mpu):#input_matrix):
+def d_star_loop(TB, mpu):  # input_matrix):
     # Power settings
     VOLTAGE_IN = 9.6  # Total battery voltage to the ThunderBorg
 
@@ -374,16 +370,14 @@ def d_star_loop(TB, mpu):#input_matrix):
     else:
         max_power = VOLTAGE_OUT / float(VOLTAGE_IN)
     input_matrix = [
-        [0, 0, -1, 0,  0, 0],
-        [0, 0, -1, 0,  0, 0],
-        [0, 0, -1, 0,  0, 0],
-        [0, 0, -1, 0,  0, 0],
-        [0, 0,  0, 0,  0, 0],
-        [0, 0,  0, 0,  0, 0],
+        [0, 0, -1, 0, 0, 0],
+        [0, 0, -1, 0, 0, 0],
+        [0, 0, -1, 0, 0, 0],
+        [0, 0, -1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
     ]
-    
-    
-    
+
     graph = Grid(len(input_matrix[0]), len(input_matrix))
     d_star_lite = D_Star_Lite()
     for i in range(len(input_matrix)):
@@ -400,21 +394,21 @@ def d_star_loop(TB, mpu):#input_matrix):
     k_m = 0
     s_last = s_start
     queue = []
-    
+
     graph, queue, k_m = d_star_lite.initDStarLite(graph, queue, s_start, s_goal, k_m)
-    
+
     s_current = s_start
     pos_coords = d_star_lite.stateNameToCoords(s_current)
     d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
-    
-    curr_angle=0
+
+    curr_angle = 0
     s_new = None
-    
-    
 
     d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
     while s_new != s_goal:
-        x_, y_, distance = scan_next(max_power, graph, d_star_lite, s_current, curr_angle)
+        x_, y_, distance = scan_next(
+            max_power, graph, d_star_lite, s_current, curr_angle
+        )
         # logical bounds checking
         if distance < 60 and distance != -1:
             graph.cells[y_][x_] = -2
@@ -423,19 +417,16 @@ def d_star_loop(TB, mpu):#input_matrix):
             graph.printGrid()
             s_new = s_current
         else:
-            perform_drive(1,TB, mpu, max_power)
+            perform_drive(1, TB, mpu, max_power)
             s_current = s_new
 
-
-            #position of these two lines will need testing
+            # position of these two lines will need testing
             s_current = s_new
             k_m += d_star_lite.heuristic_from_s(graph, s_last, s_new)
-            d_star_lite.computeShortestPath(graph, queue, s_current, k_m)      
+            d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
             d_star_lite.updateObsticles(graph, queue, s_current, k_m, 1)
-        i +=1
+        i += 1
         print(s_new)
-        
-        
 
 
 def scan_next(max_power, graph, d_star_lite, s_current, curr_angle):
@@ -443,21 +434,19 @@ def scan_next(max_power, graph, d_star_lite, s_current, curr_angle):
     current = d_star_lite.stateNameToCoords(s_current)
     next = d_star_lite.stateNameToCoords(next_location)
     x, y = (current[0], current[1])
-    x_, y_ = (next[0],next[1])
+    x_, y_ = (next[0], next[1])
     unit_target_vector = (x_ - x, y - y_)
     target_angle = calculate_angle(unit_target_vector)
-    delta_angle = (target_angle - curr_angle)
-        #spin to delta angle
-    #perform_spin(delta_angle, target_angle, TB, mpu, max_power)
-    #distance = hcsr.pulse()
-    #distance = round(distance, 3)
+    delta_angle = target_angle - curr_angle
+    # spin to delta angle
+    # perform_spin(delta_angle, target_angle, TB, mpu, max_power)
+    # distance = hcsr.pulse()
+    # distance = round(distance, 3)
     distance = 66
-    
-    #if i ==4:
+
+    # if i ==4:
     #    distance = 12
-    return next_location, x_, y_,distance
-
-
+    return next_location, x_, y_, distance
 
 
 if __name__ == "__main__":
@@ -469,7 +458,7 @@ if __name__ == "__main__":
     except:
         # stop motors
         TB.SetCommsFailsafe(False)
-        TB.SetLeds(0,0,0)
+        TB.SetLeds(0, 0, 0)
         TB.MotorsOff()
 
         # end sensor thread
