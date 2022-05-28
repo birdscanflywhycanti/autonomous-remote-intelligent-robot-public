@@ -62,6 +62,33 @@ class HCSR04():
         GPIO.cleanup()  # reset pins
         logging.debug("cleaned up pins")
 
+    def get_distance(self):
+        # perform obstacle checks
+        total_pulses = 0
+        avg_distance = 0
+        N = 10
+        self.setup()  # setup sensor and settle
+        for i in range(N):  # attempt N pulses
+            distance = self.pulse()
+            time.sleep(0.1)  # pause inbetween pulses
+            if distance <= 60 and distance > 0:  # if within 0-60cm range
+                avg_distance += distance
+                total_pulses += 1  # increment successfuly pulses
+
+            logging.debug(f"Pulse no. {i}, measured: {distance}cm")
+
+        self.cleanup()  # cleanup sensor
+
+        if total_pulses > 0:
+            avg_distance /= total_pulses
+            avg_distance = round(avg_distance, 3)
+        else:
+            avg_distance = -1
+
+        confidence = total_pulses / float(N)
+        
+        return avg_distance, confidence
+
 if __name__ == "__main__":
     # enable debug logging
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)

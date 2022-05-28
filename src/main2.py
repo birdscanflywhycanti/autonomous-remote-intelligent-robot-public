@@ -67,15 +67,39 @@ def main(TB, mpu):
     else:
         max_power = VOLTAGE_OUT / float(VOLTAGE_IN)
 
+    #input_matrix = [
+    #    [0, -1, 0, 0, 0],
+    #    [0, -1, 0, 0, 0],
+    #    [0, -1, 0, 0, 0],
+    #    [0, -1, 0, 0, 0],
+    #    [0, 0, 0, 0, 0],
+    #    [0, 0, 0, 0, 0],
+    #]
+
+    unit_size = 1.5
     input_matrix = [
-        [0, -1, 0, 0, 0],
-        [0, -1, 0, 0, 0],
-        [0, -1, 0, 0, 0],
-        [0, -1, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
+        [0,]*5,
+        [0,]*5,
+        [0,]*5,
+        [0,]*5,
+        [0,]*5,
+        [0,]*5,
+        [0,]*5,
+        [0,]*5,
+        [0,]*5,
     ]
 
+    s_current = "x2y6"  # start at (3,0)
+    s_queue = ["x0y4", "x3y0"]    # navigate to (0,0), then return to (3,0)
+
+    #s_current = navigate(input_matrix, s_current, "x0y4", TB, mpu, unit_size, max_power)
+    #s_current = navigate(input_matrix, s_current, "x3y0", TB, mpu, unit_size, max_power)
+
+    for s_goal in s_queue:
+        s_current = navigate(input_matrix, s_current, s_goal, TB, mpu, unit_size, max_power)
+
+
+def navigate(input_matrix, s_start, s_goal, TB, mpu, unit_size, max_power):    
     graph = Grid(len(input_matrix), len(input_matrix[0]))
     d_star_lite = D_Star_Lite()
 
@@ -84,8 +108,7 @@ def main(TB, mpu):
     graph.cells = input_matrix
 
     logging.info("Initialised environment:")
-    s_start = "x3y0"
-    s_goal = "x0y0"
+    
     goal_coords = d_star_lite.stateNameToCoords(s_goal)
     graph.setStart(s_start)
     graph.setGoal(s_goal)
@@ -120,7 +143,7 @@ def main(TB, mpu):
         else:
             logging.info(f"Moving to {x_}, {y_}")
             time.sleep(0.5)
-            perform_drive(1, TB, mpu, max_power)
+            perform_drive(unit_size, TB, mpu, max_power)
             s_current = s_new  # update current position with new position
             
         graph.printGrid(s_start, s_goal, s_current)
@@ -129,19 +152,25 @@ def main(TB, mpu):
         d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
         d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
         print(s_current)
+
+    # once reached goal, align self to 0 degrees (map North)
+    perform_spin(curr_angle, 0, TB, mpu, max_power)
+
     logging.info("Found goal!")
 
-    # stop motors
-    TB.SetCommsFailsafe(False)
-    TB.SetLeds(0, 0, 0)
-    TB.MotorsOff()
+    return s_current
 
-    # end sensor thread
-    mpu.join()
 
-    # exit program
-    logging.info("Stopped")
-    sys.exit()
+def smallestAngle(currentAngle, targetAngle):
+    # Subtract the angles, constraining the value to [0, 360)
+    diff = ( targetAngle - currentAngle) % 360
+
+    # If we are more than 180 we're taking the long way around.
+    # Let's instead go in the shorter, negative direction
+    if diff > 180 :
+        diff = -(360 - diff)
+
+    return diff
 
 
 def scan_next(max_power, graph, d_star_lite, s_current, curr_angle):
@@ -157,8 +186,10 @@ def scan_next(max_power, graph, d_star_lite, s_current, curr_angle):
     unit_target_vector = (x_ - x, y - y_)
     target_angle = calculate_angle(unit_target_vector)
 
-    delta_angle = target_angle - mpu.orientation
-    #delta_angle = target_angle - curr_angle
+    #delta_angle = target_angle - mpu.orientation   # perform spin based on exact angle
+    #delta_angle = target_angle - curr_angle # perform spin based on approx angle
+    delta_angle = smallestAngle(curr_angle, target_angle)
+    
     logging.info(
         f"Rotating approx {delta_angle} degrees from {mpu.orientation} degrees"
     )
@@ -167,35 +198,31 @@ def scan_next(max_power, graph, d_star_lite, s_current, curr_angle):
     time.sleep(0.2)
     print(delta_angle)
     
-    if delta_angle != 0:    
+    if delta_angle != 0:
         perform_spin(delta_angle, target_angle, TB, mpu, max_power)
 
-    # perform obstacle checks
-    total_pulses = 0
-    avg_distance = 0
-    hcsr.setup()  # setup sensor and settle
-    for i in range(10):  # attempt N pulses
-        distance = hcsr.pulse()
-        time.sleep(0.1)  # pause inbetween pulses
-        if distance <= 60 and distance > 0:  # if within 0-60cm range
-            avg_distance += distance
-            total_pulses += 1  # increment successfuly pulses
-
-        logging.debug(f"Pulse no. {i}, measured: {distance}cm")
-
-    hcsr.cleanup()  # cleanup sensor
-
-    if total_pulses > 0:
-        avg_distance /= total_pulses
-        avg_distance = round(avg_distance, 3)
-    else:
-        avg_distance = -1
+    avg_distance, confidence = hcsr.get_distance()
 
     logging.info(
-        f"Successfully pulsed {total_pulses} times, average distance of {avg_distance}cm"
+        f"Average distance of {avg_distance}cm, confidence of {confidence}"
     )
 
     return next_location, x_, y_, avg_distance, target_angle
+
+
+def door_state_closed():
+    """ Assumes agent is oriented to face door, with door being inside next cell. """
+    
+    avg_distance, confidence = hcsr.get_distance()
+
+    logging.info(
+        f"Average distance of {avg_distance}cm, confidence of {confidence}"
+    )
+
+    if avg_distance < 40:   # if obstable, then door closed
+        return True
+    else:   # no obstacle, door open
+        return False
 
 
 if __name__ == "__main__":
@@ -206,6 +233,9 @@ if __name__ == "__main__":
         main(TB, mpu)
 
     except:
+        pass
+
+    finally:
         # stop motors
         TB.SetCommsFailsafe(False)
         TB.SetLeds(0, 0, 0)

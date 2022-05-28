@@ -12,20 +12,20 @@ import ThunderBorg3 as ThunderBorg  # conversion for python 3
 
 import logging
 
-# Function to drive a distance in meters
-def perform_drive(meters, TB, mpu, max_power):
-    """Drive a distance in meters.
+# Function to drive a distance in units
+def perform_drive(units, TB, mpu, max_power):
+    """Drive a distance in units.
 
     Args:
-        meters (float): distance to drive in meters.
+        units (float): distance to drive in units.
     """
     power = max_power*0.75
 
-    if meters < 0.0:
+    if units < 0.0:
         # Reverse drive
         drive_left = -1.0
         drive_right = -1.0
-        meters *= -1
+        units *= -1
     else:
         # Forward drive
         drive_left = +1.0
@@ -67,17 +67,17 @@ def perform_drive(meters, TB, mpu, max_power):
         )
 
         # if exceeded target exit
-        if total_motion >= meters:
+        if total_motion >= units:
             break  # exit once achieved target rotation
         # if predicted to exceed during sleep, sleep for predicted time to target, then exit
-        elif (total_motion + sample) >= meters:
-            # total degrees left in metres (meters-total_motion) divided by abs(z)
+        elif (total_motion + sample) >= units:
+            # total degrees left in metres (units-total_motion) divided by abs(z)
             # (positive acceleration) gives time to sleep (in seconds) before reaching target
-            sleep = (meters - total_motion) / velocity
+            sleep = (units - total_motion) / velocity
 
             logging.debug(
-                "Assuming constant velocity of Z:%.2f, sleeping for %.2f seconds to drive %.2f meters"
-                % (velocity, sleep, (meters - total_motion))
+                "Assuming constant velocity of Z:%.2f, sleeping for %.2f seconds to drive %.2f units"
+                % (velocity, sleep, (units - total_motion))
             )
             time.sleep(sleep)
 

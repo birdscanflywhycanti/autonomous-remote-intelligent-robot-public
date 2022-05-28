@@ -35,27 +35,26 @@ def perform_spin(delta, target, TB, mpu, max_power):
         max_power (float): maximum power to use.
     """
 
-    delta = smallestAngle(mpu.orientation, target)
+    #delta = smallestAngle(mpu.orientation, target)
     delta = int(delta)
     
-    logging.debug(f"DELTA: {delta}")
+    #logging.debug(f"DELTA: {delta}")
+    print(f"DELTA: {delta}")
 
     power = max_power * 0.8
-    delta = int(delta)
-    if abs(delta) <  30:
-        delta = delta * -1
-        power = max_power * 0.7
-        
-        
+    
+    
     if delta < 0.0:
         # Left turn
         drive_left = -1.0
         drive_right = +1.0
         delta *= -1
+        print("LEFT")
     else:
         # Right turn
         drive_left = +1.0
         drive_right = -1.0
+        print("RIGHT")
     
     mpu.orientation_flag = True
     
@@ -71,7 +70,7 @@ def perform_spin(delta, target, TB, mpu, max_power):
     sampling = 0.08
     total_rotation = 0
 
-    while True:
+    while 1:
         abs_z = mpu.abs_z
         sample = abs_z * sampling
 

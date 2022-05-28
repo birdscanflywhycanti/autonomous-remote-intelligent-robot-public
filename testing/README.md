@@ -36,7 +36,7 @@ scp -r testing pi@192.168.11.11:testing
 1. *On laptop, connected to internet*
 ```bash
 mkdir dependencies
-pip download -r requirements.txt -d "./dependencies"
+python3 -m pip download -r requirements.txt -d "./dependencies"
 tar cvfz dependencies.tar.gz dependencies
 ```
 
@@ -49,7 +49,7 @@ scp dependencies.tar.gz pi@192.168.11.11:dependencies.tar.gz
 ```bash
 tar zxvf dependencies.tar.gz
 cd dependencies
-pip install * -f ./ --no-index
+python3 -m pip install * -f ./ --no-index --no-deps
 ```
 
 ### Troubleshooting
