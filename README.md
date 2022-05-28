@@ -1,13 +1,14 @@
 # Autonomous Remote Intelligent Robot
-comp5010 group project
+## Link to Video:
+
+## Project Description 
 
 ### Participants
 Zachary - [@Cutwell](https://github.com/Cutwell)
 
 Ivan - [@luckychan12](https://github.com/luckychan12)
 
-
-## Libraries used:
+## Libraries Used:
 
 ## Feature Showoff
 
@@ -19,6 +20,6 @@ Ivan - [@luckychan12](https://github.com/luckychan12)
 
 ## What makes your program special and how does it compare to similar things?
 
-# How to run the program
+## How to run the program
 
-# How to setup the project on a Raspberry Pi 
+## How to setup the project on a Raspberry Pi 
