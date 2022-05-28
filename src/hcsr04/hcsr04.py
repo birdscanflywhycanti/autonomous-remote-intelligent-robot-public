@@ -19,7 +19,7 @@ class HCSR04():
         logging.debug("setup echo")
         GPIO.output(self.trigger, False)
         logging.debug("set trigger to False")
-        time.sleep(1)   # settle sensor
+        time.sleep(0.5)   # settle sensor
         logging.debug("settled sensor")
 
     def pulse(self):
@@ -66,11 +66,13 @@ class HCSR04():
         # perform obstacle checks
         total_pulses = 0
         avg_distance = 0
-        N = 10
+        N = 20
+
         self.setup()  # setup sensor and settle
+        
         for i in range(N):  # attempt N pulses
             distance = self.pulse()
-            time.sleep(0.1)  # pause inbetween pulses
+            time.sleep(0.05)  # pause inbetween pulses
             if distance <= 60 and distance > 0:  # if within 0-60cm range
                 avg_distance += distance
                 total_pulses += 1  # increment successfuly pulses
@@ -95,6 +97,8 @@ if __name__ == "__main__":
 
     sensor = HCSR04(trigger=12, echo=24, echo_timeout_ns=3000000000)    # 3 second timeout (in nanoseconds)
     try:
+        sensor.setup()
+        
         while 1:
             distance = sensor.pulse()
             distance = round(distance, 3)

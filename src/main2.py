@@ -1,6 +1,7 @@
 """Top level main file for running the application"""
 
 # imports
+from cmath import log
 import logging
 import sys
 import time
@@ -87,16 +88,37 @@ def main(TB, mpu):
         [0,]*5,
         [0,]*5,
         [0,]*5,
+        [0,]*5,
+        [0,]*5,
+        [0,]*5,
     ]
 
-    s_current = "x2y6"  # start at (3,0)
-    s_queue = ["x0y4", "x3y0"]    # navigate to (0,0), then return to (3,0)
+    s_current = "x2y11"  # start at (3,0)
+    s_queue = ["x0y5", "x4y1"]    # navigate to (0,0), then return to (3,0)
 
     #s_current = navigate(input_matrix, s_current, "x0y4", TB, mpu, unit_size, max_power)
     #s_current = navigate(input_matrix, s_current, "x3y0", TB, mpu, unit_size, max_power)
 
-    for s_goal in s_queue:
-        s_current = navigate(input_matrix, s_current, s_goal, TB, mpu, unit_size, max_power)
+    s_current = navigate(input_matrix, s_current, s_queue[0], TB, mpu, unit_size, max_power)
+    time.sleep(0.3)
+    perform_spin(-90, 270, TB, mpu, max_power)  # perform spin from 0 to 270 degrees
+    if door_state_closed():
+        logging.info("Door is closed")
+    else:
+        logging.info("Door is open")
+    perform_spin(90, 0, TB, mpu, max_power)  # perform spin from 270 to 0 degrees
+
+    s_current = navigate(input_matrix, s_current, s_queue[1], TB, mpu, unit_size, max_power)
+    time.sleep(0.3)
+    perform_spin(90, 90, TB, mpu, max_power)  # perform spin from 0 to 90 degrees
+    if door_state_closed():
+        logging.info("Door is closed")
+    else:
+        logging.info("Door is open")
+    perform_spin(-90, 0, TB, mpu, max_power)  # perform spin from 90 to 0 degrees
+
+    #for s_goal in s_queue:
+    #    s_current = navigate(input_matrix, s_current, s_goal, TB, mpu, unit_size, max_power)
 
 
 def navigate(input_matrix, s_start, s_goal, TB, mpu, unit_size, max_power):    
@@ -142,7 +164,7 @@ def navigate(input_matrix, s_start, s_goal, TB, mpu, unit_size, max_power):
 
         else:
             logging.info(f"Moving to {x_}, {y_}")
-            time.sleep(0.5)
+            time.sleep(0.1)
             perform_drive(unit_size, TB, mpu, max_power)
             s_current = s_new  # update current position with new position
             
@@ -195,7 +217,7 @@ def scan_next(max_power, graph, d_star_lite, s_current, curr_angle):
     )
     print("Facing " + str(target_angle) + " || Turn " + str(delta_angle))
  
-    time.sleep(0.2)
+    time.sleep(0.1)
     print(delta_angle)
     
     if delta_angle != 0:
@@ -219,7 +241,7 @@ def door_state_closed():
         f"Average distance of {avg_distance}cm, confidence of {confidence}"
     )
 
-    if avg_distance < 40:   # if obstable, then door closed
+    if avg_distance < 60 and avg_distance > 0:   # if obstable, then door closed
         return True
     else:   # no obstacle, door open
         return False
