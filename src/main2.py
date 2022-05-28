@@ -1,10 +1,10 @@
 """Top level main file for running the application"""
 
 # imports
-from cmath import log
 import logging
 import sys
 import time
+from cmath import log
 
 import ThunderBorg3 as ThunderBorg  # conversion for python 3
 from algorithms.algorithm import D_Star_Lite, Graph, Grid, Node
@@ -157,7 +157,7 @@ def navigate(input_matrix, s_start, s_goal, TB, mpu, unit_size, max_power):
         s_new, x_, y_, distance, curr_angle = scan_next(max_power, graph, d_star_lite, s_current, curr_angle)
 
         # logical bounds checking
-        if distance < 40 and distance != -1:
+        if distance < 40 and distance != -1 and s_new != s_goal:
             s_new = s_current
             graph.cells[y_][x_] = -2
             d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
