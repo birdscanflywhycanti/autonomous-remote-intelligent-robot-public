@@ -91,10 +91,11 @@ def main(TB, mpu):
         [0,]*5,
         [0,]*5,
         [0,]*5,
+        [0,]*5,
     ]
 
-    s_current = "x2y11"  # start at (3,0)
-    s_queue = ["x0y5", "x4y1"]    # navigate to (0,0), then return to (3,0)
+    s_current = "x2y12"  # start at (3,0)
+    s_queue = ["x0y6", "x4y0"]    # navigate to (0,0), then return to (3,0)
 
     #s_current = navigate(input_matrix, s_current, "x0y4", TB, mpu, unit_size, max_power)
     #s_current = navigate(input_matrix, s_current, "x3y0", TB, mpu, unit_size, max_power)
