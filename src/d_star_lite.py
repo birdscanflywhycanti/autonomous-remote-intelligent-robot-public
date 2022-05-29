@@ -198,8 +198,8 @@ def navigate(input_matrix, s_start, s_goal, TB, mpu, unit_size, max_power, d_sta
             time.sleep(0.1)
             perform_drive(unit_size, TB, mpu, max_power, velocity_log)
             s_current = s_new  # update current position with new position
-            
-        graph.printGValues(s_start, s_goal, s_current)
+        
+        g = graph.printGValues(s_start, s_goal, s_current)
         d_star_log.debug(g)
         d_star_log.debug('------')
 

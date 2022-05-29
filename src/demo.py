@@ -89,16 +89,6 @@ def main(TB, mpu, d_star_log, hcsr04_log, mpu6050_log, velocity_log):
     else:
         max_power = VOLTAGE_OUT / float(VOLTAGE_IN)
 
-    #input_matrix = [
-    #    [0, -1, 0, 0, 0],
-    #    [0, -1, 0, 0, 0],
-    #    [0, -1, 0, 0, 0],
-    #    [0, -1, 0, 0, 0],
-    #    [0, 0, 0, 0, 0],
-    #    [0, 0, 0, 0, 0],
-    #]
-
-
     # load instrutions from file
     script_path = abspath(dirname(__file__))
     with open(f'{script_path}/instructions.json') as json_file:
@@ -113,27 +103,16 @@ def main(TB, mpu, d_star_log, hcsr04_log, mpu6050_log, velocity_log):
         s_goal = instruction['goal']
         final_rotation = instruction['final_rotation']
 
-
         s_current = navigate(input_matrix, s_current, s_goal, TB, mpu, unit_size, max_power, d_star_log, hcsr04_log, mpu6050_log, velocity_log)
         time.sleep(0.3)
-        perform_spin(final_rotation, 270, TB, mpu, max_power, mpu6050_log)  # perform spin from 0 to 270 degrees
-    if door_state_closed():
-        logging.info("Door is closed")
-    else:
-        logging.info("Door is open")
-    perform_spin(90, 0, TB, mpu, max_power, mpu6050_log)  # perform spin from 270 to 0 degrees
+        perform_spin(final_rotation, 270, TB, mpu, max_power, mpu6050_log)  # perform spin from 0 to N degrees
 
-    s_current = navigate(input_matrix, s_current, s_queue[1], TB, mpu, unit_size, max_power, d_star_log, hcsr04_log, mpu6050_log, velocity_log)
-    time.sleep(0.3)
-    perform_spin(90, 90, TB, mpu, max_power, mpu6050_log)  # perform spin from 0 to 90 degrees
-    if door_state_closed():
-        logging.info("Door is closed")
-    else:
-        logging.info("Door is open")
-    perform_spin(-90, 0, TB, mpu, max_power, mpu6050_log)  # perform spin from 90 to 0 degrees
-
-    #for s_goal in s_queue:
-    #    s_current = navigate(input_matrix, s_current, s_goal, TB, mpu, unit_size, max_power)
+        if door_state_closed():
+            logging.info("Door is closed")
+        else:
+            logging.info("Door is open")
+        
+        perform_spin(-final_rotation, 0, TB, mpu, max_power, mpu6050_log)  # perform spin from N to 0 degrees
 
 
 def navigate(input_matrix, s_start, s_goal, TB, mpu, unit_size, max_power, d_star_log, hcsr04_log, mpu6050_log):    
