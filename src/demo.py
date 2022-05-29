@@ -4,8 +4,7 @@
 import logging
 import sys
 import time
-from cmath import log
-
+import json
 import ThunderBorg3 as ThunderBorg  # conversion for python 3
 from algorithms.algorithm import D_Star_Lite, Graph, Grid, Node
 from hcsr04 import HCSR04
@@ -13,6 +12,7 @@ from mpu6050 import MPU6050
 from robot.accelerometer import perform_drive
 from robot.drive import calculate_angle, follow, pathing
 from robot.gyroscope import perform_spin
+from os.path import dirname, abspath
 
 # Setup the ThunderBorg
 TB = ThunderBorg.ThunderBorg()
@@ -98,34 +98,25 @@ def main(TB, mpu, d_star_log, hcsr04_log, mpu6050_log, velocity_log):
     #    [0, 0, 0, 0, 0],
     #]
 
-    unit_size = 1.5
-    input_matrix = [
-        [0,]*5,
-        [0,]*5,
-        [0,]*5,
-        [0,]*5,
-        [0,]*5,
-        [0,]*5,
-        [0,]*5,
-        [0,]*5,
-        [0,]*5,
-        [0,]*5,
-        [0,]*5,
-        [0,]*5,
-        [0,]*5,
-    ]
 
-    # hard coded example to check 2 doors in corridor
+    # load instrutions from file
+    script_path = abspath(dirname(__file__))
+    with open(f'{script_path}/instructions.json') as json_file:
+        data = json.load(json_file)
+    
+        input_matrix = data['input_matrix']
+        instructions = data['instructions']
+        unit_size = data['unit_size']
+        s_current = data['start']
 
-    s_current = "x2y12"  # start at (3,0)
-    s_queue = ["x0y6", "x4y0"]    # navigate to (0,0), then return to (3,0)
+    for instruction in instructions:
+        s_goal = instruction['goal']
+        final_rotation = instruction['final_rotation']
 
-    #s_current = navigate(input_matrix, s_current, "x0y4", TB, mpu, unit_size, max_power)
-    #s_current = navigate(input_matrix, s_current, "x3y0", TB, mpu, unit_size, max_power)
 
-    s_current = navigate(input_matrix, s_current, s_queue[0], TB, mpu, unit_size, max_power, d_star_log, hcsr04_log, mpu6050_log, velocity_log)
-    time.sleep(0.3)
-    perform_spin(-90, 270, TB, mpu, max_power, mpu6050_log)  # perform spin from 0 to 270 degrees
+        s_current = navigate(input_matrix, s_current, s_goal, TB, mpu, unit_size, max_power, d_star_log, hcsr04_log, mpu6050_log, velocity_log)
+        time.sleep(0.3)
+        perform_spin(final_rotation, 270, TB, mpu, max_power, mpu6050_log)  # perform spin from 0 to 270 degrees
     if door_state_closed():
         logging.info("Door is closed")
     else:

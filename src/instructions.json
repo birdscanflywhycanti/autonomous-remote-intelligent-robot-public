@@ -14,15 +14,16 @@
         [0,0,0,0,0],
         [0,0,0,0,0]
     ],
+    "unit_size": 1.5,
     "start": "x2y12",
     "instructions": [
         {
             "goal": "x0y6",
-            "rotate": -90
+            "final_rotation": -90
         },
         {
             "goal": "x4y0",
-            "rotate": 90
+            "final_rotation": 90
         }
     ]
 }
