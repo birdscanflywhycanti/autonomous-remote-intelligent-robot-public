@@ -93,7 +93,7 @@ class HCSR04():
 
 if __name__ == "__main__":
     # enable debug logging
-    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
+    logging.basicConfig(filename="logging_mpu6050", filemode="a", format='%(asctime)s - %(message)s', level=logging.INFO)
 
     sensor = HCSR04(trigger=12, echo=24, echo_timeout_ns=3000000000)    # 3 second timeout (in nanoseconds)
     try:

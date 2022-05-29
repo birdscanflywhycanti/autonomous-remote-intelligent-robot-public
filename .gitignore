@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# video files
+*.mp4
+
 # Mac OSX DS_Store
 .DS_Store
 

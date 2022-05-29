@@ -167,4 +167,4 @@ if __name__ == "__main__":
     i2c = board.I2C()  # uses board.SCL and board.SDA
     mpu = adafruit_mpu6050.MPU6050(i2c)
 
-    perform_spin(90)
+    perform_spin(360)

@@ -60,7 +60,7 @@ class MPU6050(Thread):
 
 if __name__ == "__main__":
     # enable debug logging
-    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
+    logging.basicConfig(filename="logging_mpu6050", filemode="a", format='%(asctime)s - %(message)s', level=logging.DEBUG)
 
     # initialise mpu6050 board
     mpu = MPU6050()
