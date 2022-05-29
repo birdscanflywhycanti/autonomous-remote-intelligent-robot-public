@@ -144,13 +144,18 @@ def navigate(input_matrix, s_start, s_goal, TB, mpu, unit_size, max_power):
     graph, queue, k_m = d_star_lite.initDStarLite(graph, queue, s_start, s_goal, k_m)
     s_current = s_start
     pos_coords = d_star_lite.stateNameToCoords(s_current)
-    d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
+    
+    max_dim = len(input_matrix)
+    if len(input_matrix[0]) > max_dim:
+        max_dim = len(input_matrix[0])
+    
+    d_star_lite.updateObsticles(graph, queue, s_current, k_m, max_dim)
     curr_angle = 0
     s_new = None
     logging.info("Initialised D*")
 
     d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
-    graph.printGrid(s_start, s_goal, s_current)
+    graph.printGValues(s_start, s_goal, s_current)
     logging.info("Found initial shortest path")
 
     while s_new != s_goal:
@@ -160,7 +165,7 @@ def navigate(input_matrix, s_start, s_goal, TB, mpu, unit_size, max_power):
         if distance < 40 and distance != -1 and s_new != s_goal:
             s_new = s_current
             graph.cells[y_][x_] = -2
-            d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
+            d_star_lite.updateObsticles(graph, queue, s_current, k_m, 2)
             logging.info(f"Found obstacle at {x_},{y_}")
 
         else:
@@ -173,7 +178,7 @@ def navigate(input_matrix, s_start, s_goal, TB, mpu, unit_size, max_power):
         # position of these two lines will need testing
         k_m += d_star_lite.heuristic_from_s(graph, s_last, s_new)
         d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
-        d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
+        d_star_lite.updateObsticles(graph, queue, s_current, k_m, 2)
         print(s_current)
 
     # once reached goal, align self to 0 degrees (map North)

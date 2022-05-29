@@ -139,9 +139,9 @@ class Grid(Graph):
             string = ""
             for col in row:
                 if col != "⬛" and col != "🟢" and col != "🔴" and col != "🚗":
-                    string += f'{col:>2}'
+                    string += f'{col:>3}'
                 else:
-                    string += f'{col:>1}'
+                    string += f'{col:>2}'
             print(string)
         return tmp
 
@@ -366,13 +366,17 @@ def d_star_loop():#input_matrix):
     graph, queue, k_m = d_star_lite.initDStarLite(graph, queue, s_start, s_goal, k_m)
     s_current = s_start
     pos_coords = d_star_lite.stateNameToCoords(s_current)
-    d_star_lite.updateObsticles(graph, queue, s_current, k_m, 2)
+    max_dim = len(input_matrix)
+    if len(input_matrix[0]) > max_dim:
+        max_dim = len(input_matrix[0])
+    
+    d_star_lite.updateObsticles(graph, queue, s_current, k_m, max_dim)
     curr_angle=0
     s_new = None
     
     
     d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
-    graph.printGrid(s_start, s_goal, s_current)
+    graph.printGValues(s_start, s_goal, s_current)
     i = 0
     while s_new != s_goal:
         s_new, x_, y_, distance, curr_angle = scan_next(i, graph, d_star_lite, s_current, curr_angle)
@@ -381,7 +385,7 @@ def d_star_loop():#input_matrix):
         if distance < 60 and distance != -1:
             s_new = s_current
             graph.cells[y_][x_] = -2
-            d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
+            d_star_lite.updateObsticles(graph, queue, s_current, k_m, 2)
             print("**Obsticle Detected at " + s_new + "**")
             graph.printGValues(s_start, s_goal, s_current)
         else:
@@ -392,8 +396,9 @@ def d_star_loop():#input_matrix):
             
         k_m += d_star_lite.heuristic_from_s(graph, s_last, s_new)
         d_star_lite.computeShortestPath(graph, queue, s_current, k_m)      
-        d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
+        d_star_lite.updateObsticles(graph, queue, s_current, k_m, 2)
         i += 1
+        print("\n")
 
 
 def scan_next(i, graph, d_star_lite, s_current, curr_angle):

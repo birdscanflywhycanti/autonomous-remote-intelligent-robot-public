@@ -137,9 +137,9 @@ class Grid(Graph):
             string = ""
             for col in row:
                 if col != "⬛" and col != "🟢" and col != "🔴" and col != "🚗":
-                    string += f'{col:>2}'
+                    string += f'{col:>3}'
                 else:
-                    string += f'{col:>1}'
+                    string += f'{col:>2}'
             print(string)
         return tmp
 
