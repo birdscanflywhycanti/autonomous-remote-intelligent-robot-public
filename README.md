@@ -1,24 +1,31 @@
 # Autonomous Remote Intelligent Robot
+![D* Lite example](/.github/images/example.gif)
+
+## Participants
+Zachary - [@Cutwell](https://github.com/Cutwell)
+Ivan - [@luckychan12](https://github.com/luckychan12)
+
 ## Link to Video:
 
 ## Project Description 
-
-### Participants
-Zachary - [@Cutwell](https://github.com/Cutwell)
-
-Ivan - [@luckychan12](https://github.com/luckychan12)
-
-## Packages Used:
+We identified an emerging niche in autonomous robotics. Security and routine inspections of inaccessible facilities (due to distance or time of day) are often performed at the expense of human agents. We followed the state of the art developments from companies such as Boston Dynamics to develop our robot capable of autonomous behaviour and suitable for performing simple surveillance tasks.
 
 ## Feature Showoff
 
-## How to use:
 
 ## How does the program code work?
 
-## How do the functions fit together
+## Project structure
+We used a class-based structure to organise our codebase and expose individual functions.
+
+![Project tree structure](/.github/images/project_structure.png)
+
+We used a raspberry pi 4 for our central controller, and collected internal and external data using a MPU6050 and HCSR04 sensor.
+
+![Project tree structure](/.github/images/hardware_structure.png)
 
 ## What makes your program special and how does it compare to similar things?
+While other artefacts in the field make use of expensive robotic components, the Thunderborg robot is relatively inexpensive and saves cost with the sensor components used. Our project focuses on maximising performance and overcoming these hardware-based constraints.
 
 ## How to setup / run the program
 - To use this product, it is assumed that you have a Thunderborg robot, equipped with a Raspberry Pi, HCSR04 Ultrasonic Sensor, a MPU6050 Gyroscope/Accelerometer, and Python 3.X installed.
@@ -61,3 +68,6 @@ The program parameters can be set in the `instructions.json` file. Here you can 
     ]
 }
 ```
+
+## Packages Used:
+See our `requirements.txt` for a list of third-party packages used.
