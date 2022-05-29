@@ -120,7 +120,6 @@ class Grid(Graph):
         end = d.stateNameToCoords(end)
         current = d.stateNameToCoords(current)
         for j in range(len(self.cells)):
-            str_msg = ""
             for i in range(len(self.cells[0])):
                 node_id = "x" + str(i) + "y" + str(j)
                 node = self.graph[node_id]
@@ -398,7 +397,7 @@ def d_star_loop():#input_matrix):
         d_star_lite.computeShortestPath(graph, queue, s_current, k_m)      
         d_star_lite.updateObsticles(graph, queue, s_current, k_m, 2)
         i += 1
-        print("\n")
+        #print("\n")
 
 
 def scan_next(i, graph, d_star_lite, s_current, curr_angle):
@@ -438,24 +437,6 @@ def calculate_angle(unit_target_vector):
 
     # print(r)
     return angle
-
-#
-#def print_g(graph):
-#    test = [0] * len(graph.cells)
-#    for i in range(len(graph.cells)):
-#        test[i] = [0] * len(graph.cells[0])
-#    
-#    for i in range(len(graph.cells)):
-#        for j in range(len(graph.cells[i])):
-#            test[i][j] = graph.cells[i][j]
-#            
-#    for row in range(len(graph.cells)):
-#        for column in range(len(graph.cells[0])):
-#            node_name = 'x' + str(column) + 'y' + str(row)
-#            if(graph.graph[node_name].g != float('inf')):
-#                tes
-#                
-        
 
 d_star_loop()
 
