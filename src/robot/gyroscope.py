@@ -24,7 +24,7 @@ def smallestAngle(currentAngle, targetAngle):
     return diff
 
 # Function to spin an angle in degrees
-def perform_spin(delta, target, TB, mpu, max_power):
+def perform_spin(delta, target, TB, mpu, max_power, logger):
     """Spin an angle in degrees.
 
     Args:
@@ -34,6 +34,8 @@ def perform_spin(delta, target, TB, mpu, max_power):
         mpu (MPU6050): MPU6050 object.
         max_power (float): maximum power to use.
     """
+
+    logger.debug("------")
 
     #delta = smallestAngle(mpu.orientation, target)
     delta = int(delta)

@@ -40,18 +40,39 @@ if not TB.foundChip:
 
 TB.SetCommsFailsafe(False)  # Disable the communications failsafe
 
+def setup_logger(logger_name, log_file, level=logging.DEBUG):
+    l = logging.getLogger(logger_name)
+    formatter = logging.Formatter('%(asctime)s : %(message)s')  # timestamp logs
+    fileHandler = logging.FileHandler(log_file, mode='a')   # append all logs of type to this file
+    fileHandler.setFormatter(formatter)
+    streamHandler = logging.StreamHandler()
+    streamHandler.setFormatter(formatter)
+
+    l.setLevel(level)
+    l.addHandler(fileHandler)
+    l.addHandler(streamHandler)
+
+setup_logger('mpu6050', r'mpu6050.log')
+setup_logger('hcsr04', r'hcsr04.log')
+setup_logger('d_star', r'd_star.log')
+setup_logger('velocity', r'velocity.log')
+
+mpu6050_log = logging.getLogger('mpu6050')
+hcsr04_log = logging.getLogger('hcsr04')
+d_star_log = logging.getLogger('d_star')
+velocity_log = logging.getLogger('velocity')
+
 # initialise mpu6050 thread
-mpu = MPU6050()
+mpu = MPU6050(rotation_log=mpu6050_log, velocity_log=velocity_log)
 mpu.setName("MPU6050")
 mpu.start()
 
 # initialise ultrasonic object
 hcsr = HCSR04(
-    trigger=12, echo=24, echo_timeout_ns=3000000000
+    trigger=12, echo=24, echo_timeout_ns=3000000000, logger=hcsr04_log
 )  # timeout 3 seconds (in nanoseconds)
 
-
-def main(TB, mpu):
+def main(TB, mpu, d_star_log, hcsr04_log, mpu6050_log, velocity_log):
     # Power settings
     VOLTAGE_IN = 12.0  # Total battery voltage to the ThunderBorg
 
@@ -94,49 +115,51 @@ def main(TB, mpu):
         [0,]*5,
     ]
 
+    # hard coded example to check 2 doors in corridor
+
     s_current = "x2y12"  # start at (3,0)
     s_queue = ["x0y6", "x4y0"]    # navigate to (0,0), then return to (3,0)
 
     #s_current = navigate(input_matrix, s_current, "x0y4", TB, mpu, unit_size, max_power)
     #s_current = navigate(input_matrix, s_current, "x3y0", TB, mpu, unit_size, max_power)
 
-    s_current = navigate(input_matrix, s_current, s_queue[0], TB, mpu, unit_size, max_power)
+    s_current = navigate(input_matrix, s_current, s_queue[0], TB, mpu, unit_size, max_power, d_star_log, hcsr04_log, mpu6050_log, velocity_log)
     time.sleep(0.3)
-    perform_spin(-90, 270, TB, mpu, max_power)  # perform spin from 0 to 270 degrees
+    perform_spin(-90, 270, TB, mpu, max_power, mpu6050_log)  # perform spin from 0 to 270 degrees
     if door_state_closed():
         logging.info("Door is closed")
     else:
         logging.info("Door is open")
-    perform_spin(90, 0, TB, mpu, max_power)  # perform spin from 270 to 0 degrees
+    perform_spin(90, 0, TB, mpu, max_power, mpu6050_log)  # perform spin from 270 to 0 degrees
 
-    s_current = navigate(input_matrix, s_current, s_queue[1], TB, mpu, unit_size, max_power)
+    s_current = navigate(input_matrix, s_current, s_queue[1], TB, mpu, unit_size, max_power, d_star_log, hcsr04_log, mpu6050_log, velocity_log)
     time.sleep(0.3)
-    perform_spin(90, 90, TB, mpu, max_power)  # perform spin from 0 to 90 degrees
+    perform_spin(90, 90, TB, mpu, max_power, mpu6050_log)  # perform spin from 0 to 90 degrees
     if door_state_closed():
         logging.info("Door is closed")
     else:
         logging.info("Door is open")
-    perform_spin(-90, 0, TB, mpu, max_power)  # perform spin from 90 to 0 degrees
+    perform_spin(-90, 0, TB, mpu, max_power, mpu6050_log)  # perform spin from 90 to 0 degrees
 
     #for s_goal in s_queue:
     #    s_current = navigate(input_matrix, s_current, s_goal, TB, mpu, unit_size, max_power)
 
 
-def navigate(input_matrix, s_start, s_goal, TB, mpu, unit_size, max_power):    
+def navigate(input_matrix, s_start, s_goal, TB, mpu, unit_size, max_power, d_star_log, hcsr04_log, mpu6050_log):    
     graph = Grid(len(input_matrix), len(input_matrix[0]))
     d_star_lite = D_Star_Lite()
 
-    logging.info("Created D* and Grid")
+    #logging.info("Created D* and Grid")
 
     graph.cells = input_matrix
 
-    logging.info("Initialised environment:")
+    #logging.info("Initialised environment:")
     
     goal_coords = d_star_lite.stateNameToCoords(s_goal)
     graph.setStart(s_start)
     graph.setGoal(s_goal)
 
-    logging.info(f"Start: {s_start}, Goal: {s_goal}")
+    #logging.info(f"Start: {s_start}, Goal: {s_goal}")
 
     k_m = 0
     s_last = s_start
@@ -152,11 +175,13 @@ def navigate(input_matrix, s_start, s_goal, TB, mpu, unit_size, max_power):
     d_star_lite.updateObsticles(graph, queue, s_current, k_m, max_dim)
     curr_angle = 0
     s_new = None
-    logging.info("Initialised D*")
+    #logging.info("Initialised D*")
 
     d_star_lite.computeShortestPath(graph, queue, s_current, k_m)
-    graph.printGValues(s_start, s_goal, s_current)
-    logging.info("Found initial shortest path")
+    g = graph.printGValues(s_start, s_goal, s_current)
+    d_star_log.debug(g)
+    d_star_log.debug('------')
+    #logging.info("Found initial shortest path")
 
     while s_new != s_goal:
         s_new, x_, y_, distance, curr_angle = scan_next(max_power, graph, d_star_lite, s_current, curr_angle)
@@ -166,12 +191,12 @@ def navigate(input_matrix, s_start, s_goal, TB, mpu, unit_size, max_power):
             s_new = s_current
             graph.cells[y_][x_] = -2
             d_star_lite.updateObsticles(graph, queue, s_current, k_m, 2)
-            logging.info(f"Found obstacle at {x_},{y_}")
+            #logging.info(f"Found obstacle at {x_},{y_}")
 
         else:
-            logging.info(f"Moving to {x_}, {y_}")
+            #logging.info(f"Moving to {x_}, {y_}")
             time.sleep(0.1)
-            perform_drive(unit_size, TB, mpu, max_power)
+            perform_drive(unit_size, TB, mpu, max_power, velocity_log)
             s_current = s_new  # update current position with new position
             
         graph.printGrid(s_start, s_goal, s_current)
@@ -184,7 +209,7 @@ def navigate(input_matrix, s_start, s_goal, TB, mpu, unit_size, max_power):
     # once reached goal, align self to 0 degrees (map North)
     perform_spin(curr_angle, 0, TB, mpu, max_power)
 
-    logging.info("Found goal!")
+    #logging.info("Found goal!")
 
     return s_current
 
@@ -206,7 +231,7 @@ def scan_next(max_power, graph, d_star_lite, s_current, curr_angle):
     current = d_star_lite.stateNameToCoords(s_current)
     next = d_star_lite.stateNameToCoords(next_location)
 
-    logging.info(f"Next in shortest path: {next}")
+    #logging.info(f"Next in shortest path: {next}")
 
     x, y = (current[0], current[1])
     x_, y_ = (next[0], next[1])
@@ -218,22 +243,21 @@ def scan_next(max_power, graph, d_star_lite, s_current, curr_angle):
     #delta_angle = target_angle - curr_angle # perform spin based on approx angle
     delta_angle = smallestAngle(curr_angle, target_angle)
     
-    logging.info(
-        f"Rotating approx {delta_angle} degrees from {mpu.orientation} degrees"
-    )
-    print("Facing " + str(target_angle) + " || Turn " + str(delta_angle))
+    #logging.info(
+    #    f"Rotating approx {delta_angle} degrees from {mpu.orientation} degrees"
+    #)
+    #print("Facing " + str(target_angle) + " || Turn " + str(delta_angle))
  
     time.sleep(0.1)
-    print(delta_angle)
     
     if delta_angle != 0:
         perform_spin(delta_angle, target_angle, TB, mpu, max_power)
 
     avg_distance, confidence = hcsr.get_distance()
 
-    logging.info(
-        f"Average distance of {avg_distance}cm, confidence of {confidence}"
-    )
+    #logging.info(
+    #    f"Average distance of {avg_distance}cm, confidence of {confidence}"
+    #)
 
     return next_location, x_, y_, avg_distance, target_angle
 
@@ -243,9 +267,9 @@ def door_state_closed():
     
     avg_distance, confidence = hcsr.get_distance()
 
-    logging.info(
-        f"Average distance of {avg_distance}cm, confidence of {confidence}"
-    )
+    #logging.info(
+    #    f"Average distance of {avg_distance}cm, confidence of {confidence}"
+    #)
 
     if avg_distance < 60 and avg_distance > 0:   # if obstable, then door closed
         return True
@@ -255,10 +279,9 @@ def door_state_closed():
 
 if __name__ == "__main__":
     # enable info logging
-    logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
-
+    #logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
     try:
-        main(TB, mpu)
+        main(TB, mpu, d_star_log, hcsr04_log, mpu6050_log)
 
     except:
         pass

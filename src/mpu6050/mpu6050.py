@@ -9,7 +9,7 @@ import board
 
 
 class MPU6050(Thread):
-    def __init__(self):
+    def __init__(self, rotation_log=None, velocity_log=None):
         Thread.__init__(self)
 
         # initialise gyroscope board
@@ -25,6 +25,9 @@ class MPU6050(Thread):
         self.z = 0
         self.orientation = 0
         self.orientation_flag = False
+
+        self.rotation_log = rotation_log
+        self.velocity_log = velocity_log
 
     def run(self):
         """ Update loop to poll MPU sensor for gyro and accelerometer data.
@@ -45,7 +48,8 @@ class MPU6050(Thread):
         
         """
 
-        logging.debug(f"orientation: {self.orientation}")
+        if self.rotation_log:
+            self.rotation_log.debug(self.orientation)
         
         x, y, z = self.mpu.gyro
         self.abs_z = abs(math.degrees(z))

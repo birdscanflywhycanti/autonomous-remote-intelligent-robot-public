@@ -17,6 +17,11 @@ ssh pi@192.168.11.11
 ssh pi@192.168.18.55
 ```
 
+*Goel hotspot*
+```bash
+ssh pi@192.168.171.55
+```
+
 ## scp command usage:
 *Copy single file*
 ```bash

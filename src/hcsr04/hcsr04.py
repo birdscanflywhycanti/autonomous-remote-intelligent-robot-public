@@ -4,27 +4,21 @@ import time
 import logging
 
 class HCSR04():
-    def __init__(self, trigger=12, echo=24, echo_timeout_ns=3000000000):
+    def __init__(self, trigger=12, echo=24, echo_timeout_ns=3000000000, logger=None):
         self.trigger = trigger
         self.echo = echo
         self.echo_timeout_ns = echo_timeout_ns
 
+        self.logger = logger
+
     def setup(self):
         GPIO.setmode(GPIO.BCM)
-        logging.debug("setmode")
-        
         GPIO.setup(self.trigger, GPIO.OUT)
-        logging.debug("setup trigger")
         GPIO.setup(self.echo, GPIO.IN)
-        logging.debug("setup echo")
         GPIO.output(self.trigger, False)
-        logging.debug("set trigger to False")
         time.sleep(0.5)   # settle sensor
-        logging.debug("settled sensor")
 
     def pulse(self):
-        logging.debug("pulsing")
-
         # NOTE: no debugging during pulse below, as messes up timings
         GPIO.output(self.trigger, True) # send pulse for 0.00001 seconds
         time.sleep(0.001)
@@ -49,20 +43,24 @@ class HCSR04():
                 return -1
         
         # NOTE: debug from here
-        logging.debug(f"pulse start: {pulse_start_ns}")
-        logging.debug(f"pulse end: {pulse_end_ns}")
+        #logging.debug(f"pulse start: {pulse_start_ns}")
+        #logging.debug(f"pulse end: {pulse_end_ns}")
 
         pulse_duration = (pulse_end_ns - pulse_start_ns) / 1000000000   # convert from nanoseconds to seconds
-        logging.debug(f"pulse duration: {pulse_duration}")
         distance = pulse_duration * 17150   # calculate distance using speed of sound (in cm/s)
+
+        if self.logger:
+            self.logger.debug(distance)
 
         return distance
 
     def cleanup(self):
         GPIO.cleanup()  # reset pins
-        logging.debug("cleaned up pins")
 
     def get_distance(self):
+        if self.logger:
+            self.logger.debug("-----")
+
         # perform obstacle checks
         total_pulses = 0
         avg_distance = 0
@@ -77,7 +75,8 @@ class HCSR04():
                 avg_distance += distance
                 total_pulses += 1  # increment successfuly pulses
 
-            logging.debug(f"Pulse no. {i}, measured: {distance}cm")
+            #if self.logger:
+            #    self.logger.debug(i, distance)
 
         self.cleanup()  # cleanup sensor
 

@@ -10,7 +10,6 @@ pd = read_csv(f"{script_path}/test.csv", header=None)
 
 data = pd[0].tolist()
 
-
 x, y = [], []
 
 fig = plt.figure()

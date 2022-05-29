@@ -13,12 +13,15 @@ import ThunderBorg3 as ThunderBorg  # conversion for python 3
 import logging
 
 # Function to drive a distance in units
-def perform_drive(units, TB, mpu, max_power):
+def perform_drive(units, TB, mpu, max_power, logger):
     """Drive a distance in units.
 
     Args:
         units (float): distance to drive in units.
     """
+
+    logger.debug("------")
+
     power = max_power*0.75
 
     if units < 0.0:
@@ -53,6 +56,8 @@ def perform_drive(units, TB, mpu, max_power):
         change_in_velocity = z * sampling  # velocity = acceleration * time
         velocity += change_in_velocity
         sample = velocity * sampling
+
+        logger.debug(velocity)
 
         logging.debug("Acceleration X:%.2f, Y: %.2f, Z: %.2f m/s^2" % (x, y, z))
         logging.debug(
