@@ -107,17 +107,43 @@ class Grid(Graph):
                 string += f'{col:>3}'
             print(string)
 
-    def printGValues(self):
-        for j in range(self.y_dim):
+    def printGValues(self, start, end, current=None):
+        d = D_Star_Lite()
+        tmp = [0] * len(self.cells)
+        for i in range(len(self.cells)):
+           tmp[i] = [0] * len(self.cells[0])
+           
+        for i in range(len(self.cells)):        
+            for j in range(len(self.cells[i])):
+                tmp[i][j] = self.cells[i][j]        
+        start = d.stateNameToCoords(start)
+        end = d.stateNameToCoords(end)
+        current = d.stateNameToCoords(current)
+        for j in range(len(self.cells)):
             str_msg = ""
-            for i in range(self.x_dim):
+            for i in range(len(self.cells[0])):
                 node_id = "x" + str(i) + "y" + str(j)
                 node = self.graph[node_id]
-                if node.g == float("inf"):
-                    str_msg += " - "
+                if tmp[j][i] == 0:
+                    if node.g == float("inf"):
+                        tmp[j][i] = "-"
+                    else:
+                        tmp[j][i] = str(node.g)
+                if tmp[j][i] == -2:
+                    tmp[j][i] = "⬛"
+                    
+        tmp[start[1]][start[0]] = "🟢"
+        tmp[end[1]][end[0]] = "🔴"
+        tmp[current[1]][current[0]] = "🚗"
+        for row in tmp:
+            string = ""
+            for col in row:
+                if col != "⬛" and col != "🟢" and col != "🔴" and col != "🚗":
+                    string += f'{col:>2}'
                 else:
-                    str_msg += " " + str(node.g) + " "
-            print(str_msg)
+                    string += f'{col:>1}'
+            print(string)
+        return tmp
 
     def generateGraphFromGrid(self):
         edge = 1
@@ -201,6 +227,7 @@ class D_Star_Lite:
                 self.updateVertex(graph, queue, u, s_start, k_m)
                 for i in graph.graph[u].parents:
                     self.updateVertex(graph, queue, i, s_start, k_m)
+
 
     def nextInShortestPath(self, graph, s_current):
         min_rhs = float("inf")
@@ -356,17 +383,16 @@ def d_star_loop():#input_matrix):
             graph.cells[y_][x_] = -2
             d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
             print("**Obsticle Detected at " + s_new + "**")
-            graph.printGrid(s_start, s_goal, s_current)
+            graph.printGValues(s_start, s_goal, s_current)
         else:
             #perform_drive(1,TB, mpu, max_power)
             s_current = s_new
-            graph.printGrid(s_start, s_goal, s_current)
+            graph.printGValues(s_start, s_goal, s_current)
             
             
         k_m += d_star_lite.heuristic_from_s(graph, s_last, s_new)
         d_star_lite.computeShortestPath(graph, queue, s_current, k_m)      
         d_star_lite.updateObsticles(graph, queue, s_current, k_m, 20)
-        print(s_current)
         i += 1
 
 
@@ -407,6 +433,24 @@ def calculate_angle(unit_target_vector):
 
     # print(r)
     return angle
+
+#
+#def print_g(graph):
+#    test = [0] * len(graph.cells)
+#    for i in range(len(graph.cells)):
+#        test[i] = [0] * len(graph.cells[0])
+#    
+#    for i in range(len(graph.cells)):
+#        for j in range(len(graph.cells[i])):
+#            test[i][j] = graph.cells[i][j]
+#            
+#    for row in range(len(graph.cells)):
+#        for column in range(len(graph.cells[0])):
+#            node_name = 'x' + str(column) + 'y' + str(row)
+#            if(graph.graph[node_name].g != float('inf')):
+#                tes
+#                
+        
 
 d_star_loop()
 

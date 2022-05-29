@@ -105,17 +105,43 @@ class Grid(Graph):
                 string += f'{col:>3}'
             print(string)
 
-    def printGValues(self):
-        for j in range(self.y_dim):
+    def printGValues(self, start, end, current=None):
+        d = D_Star_Lite()
+        tmp = [0] * len(self.cells)
+        for i in range(len(self.cells)):
+           tmp[i] = [0] * len(self.cells[0])
+           
+        for i in range(len(self.cells)):        
+            for j in range(len(self.cells[i])):
+                tmp[i][j] = self.cells[i][j]        
+        start = d.stateNameToCoords(start)
+        end = d.stateNameToCoords(end)
+        current = d.stateNameToCoords(current)
+        for j in range(len(self.cells)):
             str_msg = ""
-            for i in range(self.x_dim):
+            for i in range(len(self.cells[0])):
                 node_id = "x" + str(i) + "y" + str(j)
                 node = self.graph[node_id]
-                if node.g == float("inf"):
-                    str_msg += " - "
+                if tmp[j][i] == 0:
+                    if node.g == float("inf"):
+                        tmp[j][i] = "-"
+                    else:
+                        tmp[j][i] = str(node.g)
+                if tmp[j][i] == -2:
+                    tmp[j][i] = "⬛"
+                    
+        tmp[start[1]][start[0]] = "🟢"
+        tmp[end[1]][end[0]] = "🔴"
+        tmp[current[1]][current[0]] = "🚗"
+        for row in tmp:
+            string = ""
+            for col in row:
+                if col != "⬛" and col != "🟢" and col != "🔴" and col != "🚗":
+                    string += f'{col:>2}'
                 else:
-                    str_msg += " " + str(node.g) + " "
-            print(str_msg)
+                    string += f'{col:>1}'
+            print(string)
+        return tmp
 
     def generateGraphFromGrid(self):
         edge = 1
