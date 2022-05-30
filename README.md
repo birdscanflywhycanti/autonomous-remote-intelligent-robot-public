@@ -1,5 +1,6 @@
 # Autonomous Remote Intelligent Robot
 ![D* Lite example](/.github/images/example.gif)
+
 ![Robot navigating around a person](/.github/images/Avoid.gif)
 
 ## Participants
@@ -11,9 +12,6 @@ Ivan - [@luckychan12](https://github.com/luckychan12)
 ## Project Description 
 We identified an emerging niche in autonomous robotics. Security and routine inspections of inaccessible facilities (due to distance or time of day) are often performed at the expense of human agents. We followed the state of the art developments from companies such as Boston Dynamics to develop our robot capable of autonomous behaviour and suitable for performing simple surveillance tasks.
 
-
-### Robot navingating around somebody stepping infront of it:
-![Robot navigating around a person](/.github/images/Avoid.gif)
 
 ## How the main program loop works:
 First, the program initialises the D* Lite Algorithm by parsing the initial environment.
