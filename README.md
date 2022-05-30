@@ -3,9 +3,11 @@
 
 ## Participants
 Zachary - [@Cutwell](https://github.com/Cutwell)
+
 Ivan - [@luckychan12](https://github.com/luckychan12)
 
 ## Link to Video:
+https://www.youtube.com/watch?v=iDN75vYgonQ
 
 ## Project Description 
 We identified an emerging niche in autonomous robotics. Security and routine inspections of inaccessible facilities (due to distance or time of day) are often performed at the expense of human agents. We followed the state of the art developments from companies such as Boston Dynamics to develop our robot capable of autonomous behaviour and suitable for performing simple surveillance tasks.
