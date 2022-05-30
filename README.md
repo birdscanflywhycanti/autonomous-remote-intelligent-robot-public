@@ -3,6 +3,7 @@
 
 ## Participants
 Zachary - [@Cutwell](https://github.com/Cutwell)
+
 Ivan - [@luckychan12](https://github.com/luckychan12)
 
 ## Link to Video:
