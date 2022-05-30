@@ -1,5 +1,6 @@
 # Autonomous Remote Intelligent Robot
 ![D* Lite example](/.github/images/example.gif)
+![Robot navigating around a person](/.github/images/Avoid.gif)
 
 ## Participants
 Zachary - [@Cutwell](https://github.com/Cutwell)
@@ -10,10 +11,21 @@ Ivan - [@luckychan12](https://github.com/luckychan12)
 ## Project Description 
 We identified an emerging niche in autonomous robotics. Security and routine inspections of inaccessible facilities (due to distance or time of day) are often performed at the expense of human agents. We followed the state of the art developments from companies such as Boston Dynamics to develop our robot capable of autonomous behaviour and suitable for performing simple surveillance tasks.
 
-## Feature Showoff
 
+### Robot navingating around somebody stepping infront of it:
+![Robot navigating around a person](/.github/images/Avoid.gif)
 
-## How does the program code work?
+## How the main program loop works:
+First, the program initialises the D* Lite Algorithm by parsing the initial environment.
+An input matrix is passed into the program, which details where any known obstacles are and how large the accessible environment is. 
+This matrix is then converted into a graph of interconnected nodes. 
+The program then initialises the weights of each node in the graph to represent any obstacles in the initial input matrix.
+After this, the program enters the main execution loop. 
+First, it calculates the next node to be visited. 
+The robot then checks to see if the next node is accessible using the ultrasonic sensors. 
+If the node is not accessible, the robot marks and updates this within its internal graph before recalculating the following shortest path. 
+If the next node to be visited is available, the robot drives to the following location and updates the algorithm of its current position in the graph. 
+
 
 ## Project structure
 We used a class-based structure to organise our codebase and expose individual functions.
@@ -68,6 +80,7 @@ The program parameters can be set in the `instructions.json` file. Here you can 
     ]
 }
 ```
-
+### The program executing the example instructions.json file
+![D* Lite example](/.github/images/corridor.gif)
 ## Packages Used:
 See our `requirements.txt` for a list of third-party packages used.
