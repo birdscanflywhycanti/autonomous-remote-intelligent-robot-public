@@ -84,3 +84,14 @@ The program parameters can be set in the `instructions.json` file. Here you can 
 ![D* Lite example](/.github/images/corridor.gif)
 ## Packages Used:
 See our `requirements.txt` for a list of third-party packages used.
+
+## What did we start with?:
+We started with a Thunderborg robot, with access to 4 driving motors, an HCSR04 ultrasonic sensor and an MPU6050 gyroscope/accelerometer sensor. Initial code for accessing the motors and sensor data was acquired from the Thunderborg forum and similar websites.
+While other artefacts in the field make use of expensive robotic components, the Thunderborg robot is relatively inexpensive and saves cost with the sensor components used. Our project focuses on maximising performance and overcoming these hardware-based constraints.
+
+We also implemeted a known algorithm (D* Lite) authored by Sven Koenig (https://aaai.org/Papers/AAAI/2002/AAAI02-072.pdf)
+We took inspiration from other peoples implementations of D* Lite. Some repositories we looked at include:
+- https://github.com/robodhhb/Interactive-D-Star-Lite
+- https://github.com/mdeyo/d-star-lite
+- https://github.com/avgaydashenko/d_star
+
