@@ -12,17 +12,26 @@ Ivan - [@luckychan12](https://github.com/luckychan12)
 ## Project Description 
 We identified an emerging niche in autonomous robotics. Security and routine inspections of inaccessible facilities (due to distance or time of day) are often performed at the expense of human agents. We followed the state of the art developments from companies such as Boston Dynamics to develop our robot capable of autonomous behaviour and suitable for performing simple surveillance tasks.
 
+## What did we start with?:
+We started with a Thunderborg robot, with access to 4 driving motors, an HCSR04 ultrasonic sensor and an MPU6050 gyroscope/accelerometer sensor. Initial code for accessing the motors and sensor data was acquired from the Thunderborg forum and similar websites.
+While other artefacts in the field make use of expensive robotic components, the Thunderborg robot is relatively inexpensive and saves cost with the sensor components used. Our project focuses on maximising performance and overcoming these hardware-based constraints.
+
+We also implemeted a known algorithm (D* Lite) authored by Sven Koenig (https://aaai.org/Papers/AAAI/2002/AAAI02-072.pdf)
+We took inspiration from other peoples implementations of D* Lite. Some repositories we looked at include:
+- https://github.com/robodhhb/Interactive-D-Star-Lite
+- https://github.com/mdeyo/d-star-lite
+- https://github.com/avgaydashenko/d_star
 
 ## How the main program loop works:
-First, the program initialises the D* Lite Algorithm by parsing the initial environment.
-An input matrix is passed into the program, which details where any known obstacles are and how large the accessible environment is. 
-This matrix is then converted into a graph of interconnected nodes. 
-The program then initialises the weights of each node in the graph to represent any obstacles in the initial input matrix.
-After this, the program enters the main execution loop. 
-First, it calculates the next node to be visited. 
-The robot then checks to see if the next node is accessible using the ultrasonic sensors. 
-If the node is not accessible, the robot marks and updates this within its internal graph before recalculating the following shortest path. 
-If the next node to be visited is available, the robot drives to the following location and updates the algorithm of its current position in the graph. 
+- First, the program initialises the D* Lite Algorithm by parsing the initial environment.
+- An input matrix is passed into the program, which details where any known obstacles are and how large the accessible environment is. 
+- This matrix is then converted into a graph of interconnected nodes. 
+- The program then initialises the weights of each node in the graph to represent any obstacles in the initial input matrix.
+- After this, the program enters the main execution loop. 
+- First, it calculates the next node to be visited. 
+- The robot then checks to see if the next node is accessible using the ultrasonic sensors. 
+- If the node is not accessible, the robot marks and updates this within its internal graph before recalculating the following shortest path. 
+- If the next node to be visited is available, the robot drives to the following location and updates the algorithm of its current position in the graph. 
 
 
 ## Project structure
@@ -82,14 +91,4 @@ The program parameters can be set in the `instructions.json` file. Here you can 
 ![D* Lite example](/.github/images/corridor.gif)
 ## Packages Used:
 See our `requirements.txt` for a list of third-party packages used.
-
-## What did we start with?:
-We started with a Thunderborg robot, with access to 4 driving motors, an HCSR04 ultrasonic sensor and an MPU6050 gyroscope/accelerometer sensor. Initial code for accessing the motors and sensor data was acquired from the Thunderborg forum and similar websites.
-While other artefacts in the field make use of expensive robotic components, the Thunderborg robot is relatively inexpensive and saves cost with the sensor components used. Our project focuses on maximising performance and overcoming these hardware-based constraints.
-
-We also implemeted a known algorithm (D* Lite) authored by Sven Koenig (https://aaai.org/Papers/AAAI/2002/AAAI02-072.pdf)
-We took inspiration from other peoples implementations of D* Lite. Some repositories we looked at include:
-- https://github.com/robodhhb/Interactive-D-Star-Lite
-- https://github.com/mdeyo/d-star-lite
-- https://github.com/avgaydashenko/d_star
 
