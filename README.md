@@ -2,9 +2,12 @@
 ![Robot navigating around a person](/.github/images/Avoid.gif)
 
 ## Participants
-Zachary - [@Cutwell](https://github.com/Cutwell)
+| | |
+|:---:|:---:|
+| Zachary - [@Cutwell](https://github.com/Cutwell) | MPU6050 and HCSR04 sensors, Thunderborg motor control |
+| Ivan - [@luckychan12](https://github.com/luckychan12) | A* and D* Lite implementation |
 
-Ivan - [@luckychan12](https://github.com/luckychan12)
+This group work was completed with equal share of work between all group members.
 
 ## Link to Video:
 [https://www.youtube.com/watch?v=iDN75vYgonQ](https://www.youtube.com/watch?v=iDN75vYgonQ)
